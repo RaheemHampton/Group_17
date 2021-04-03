@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Event Scheduler App">
+        <title>Event Scheduler</title>
+        <!-- styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    </head>
+    <body>
+
+        
+        <h1>Sign In</h1>
+
+        <form action="login" method="post">
+          <p><label>Email </label></p><p>  <input type="text" name="email"/></p>
+           <p><label>Password </label></p><p><input type="text" name="password"/></p>
+           <p><input type="submit" value="Login"/></p>
+        </form>
+
+
+        <div class="container">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                 <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+
+            {% block page_content %}{% endblock %}
+        </div>
+
+
+        <h2>No account? Create one <nav>
+            <a href="{{ url_for('register') }}"> here </a> ||
+        </nav></h2>
+
+
+
+        
+
+    </body>
+</html>
