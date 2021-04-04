@@ -9,6 +9,7 @@ from database import db
 from models import Event as event
 from models import User as User
 from flask import flash
+import re
 
 
 app = Flask(__name__)     # create an app
@@ -73,7 +74,47 @@ def login():
 # TODO
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('register.html')
+
+    error = None
+
+    if request.method == 'POST':
+        #get first name
+        first_name = request.form['first_name']
+        #get last name
+        last_name = request.form['last_name']
+        # get email data
+        in_email = request.form['email']
+        # get password data
+        password = request.form['password']
+
+        #checks if email is in a proper format
+        email_correct = re.search('^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$', in_email) is not None
+
+        if email_correct == False:
+            error = 'Please enter a valid email address '
+            return render_template('register.html', error=error)
+
+        # searches database to see if email has been used
+        user_exists = db.session.query(User.id).filter_by(email = in_email).first() is not None
+
+        if user_exists == True:
+            error = 'An email for this account has already been registered'
+            return render_template('register.html', error=error)
+
+        print(first_name, last_name, in_email, user_exists, 'Email correct: ', email_correct, 'User exists: ', user_exists)
+
+        new_record = User(in_email, first_name, last_name, password)
+        db.session.add(new_record)
+        db.session.commit()
+
+        #once account creation is successful, go to homepage
+        return render_template('home.html')
+
+
+    else:
+        # GET request - show registration form
+        return render_template('register.html')
+
 
 # TODO
 @app.route('/home', methods=['GET', 'POST'])

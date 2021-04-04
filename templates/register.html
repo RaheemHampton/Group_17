@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Event Scheduler App">
+        <meta name="description" content="Create an account">
         <title>Event Scheduler</title>
         <!-- styles -->
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
@@ -11,34 +11,33 @@
     <body>
 
         
-        <h1>Sign In</h1>
+        <h1>Create an account</h1>
 
-        <form action="login" method="post">
-          <p><label>Email </label></p><p>  <input type="text" name="email"/></p>
+        <form action="register" method="post">
+            <p><label>First name </label></p><p>  <input type="text" name="first_name"/></p>
+            <p><label>Last name </label></p><p>  <input type="text" name="last_name"/></p>
+            <p><label>Email </label></p><p>  <input type="text" name="email"/></p>
            <p><label>Password </label></p><p><input type="text" name="password"/></p>
-           <p><input type="submit" value="Login"/></p>
+           <p><input type="submit" value="Sign up"/></p>
         </form>
 
 
-        <div class="container">
-            {% for message in get_flashed_messages() %}
-            <div class="alert alert-warning">
-                 <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {{ message }}
-            </div>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+              <li>{{ message }}</li>
             {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block body %}{% endblock %}
 
-            {% block page_content %}{% endblock %}
-        </div>
+        {% if error %}
+            <p class=error><strong>Error:</strong> {{ error }}
+        {% endif %}
 
-
-        <h2>No account? Create one <nav>
-            <a href="{{ url_for('register') }}"> here </a> ||
-        </nav></h2>
-
-
-
-        
+        <h3>Back to <a href="{{ url_for('login') }}"> login </a></h3>
 
     </body>
 </html>
