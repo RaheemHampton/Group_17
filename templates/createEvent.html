@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Event Scheduler App">
+        <title>Event Scheduler</title>
+        <!-- styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    </head>
+
+    <body>
+        
+    </body>
+    
+    <body>
+
+        <h1>Event Scheduler</h1>
+        <h2>Create New Event</h2>
+
+        <form action="createEvent" method="post">
+          <p><label>Event Name </label></p><p>  <input type="text" name="event_name"/></p>
+           <p><label>Date </label></p><p><input type="text" name="event_date"/></p>
+           <p><label>Time </label></p><p>  <input type="text" name="event_time"/></p>
+           <p><label>Date </label></p><p><input type="text" name="event_date"/></p>
+           <p><label>Location </label></p><p>  <input type="text" name="event_location"/></p>
+           <p><label>Description </label></p><p><input type="text" name="event_description"/></p>
+           <p><a href="{{ url_for('home') }}"  method="GET"><button type="button">Cancel</button> </a></p>
+           <p><input type="submit" value="Save"/></p>
+        </form>
+
+
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        {% block body %}{% endblock %}
+
+        {% if error %}
+            <p class=error><strong>Error:</strong> {{ error }}
+        {% endif %}
+
+
+    
+
+
+
+        
+
+    </body>
+</html>
