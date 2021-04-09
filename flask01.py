@@ -6,10 +6,11 @@ from flask import Flask   # Flask is the web app that we will customize
 from flask import render_template
 from flask import request, redirect, url_for
 from database import db
-from models import Event as event
+from models import Event as Event
 from models import User as User
 from flask import flash
 import re
+import datetime
 
 
 app = Flask(__name__)     # create an app
@@ -26,13 +27,13 @@ db.init_app(app)
 with app.app_context():
     db.create_all()   # run under the app context
 
-# @app.route is a decorator. It gives the function "index" special powers.
-# In this case it makes it so anyone going to "your-url/" makes this function
-# get called. What it returns is what is shown as the web page
-@app.route('/')
+# global variable to hold currently logged in account, make sure to reset for logout
+currentAcc = None
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
+    global currentAcc
     error = None
     # check method used for request
     if request.method == 'POST':
@@ -49,20 +50,22 @@ def login():
         # retrieve user from database
         try:
             a_user = db.session.query(User).filter_by(email=in_email).one()
-
+            
             # check if was correct password
             if a_user.pwdCheck(in_password):
                 # password was correct, redirect to home page for user
                 flash('Successful login')
-                return redirect(url_for('home', a_user))
+                currentAcc = a_user
+                print(currentAcc != None)
+                return redirect(url_for('home'))
             else:
-                # TODO
                 # password was not correct, display error message
                 error='Password is incorrect!'
 
-        except:
+        except Exception as e:
             # email was not listed in the db for any user, disaply error message
             error = 'Email is not found!'
+            print(e)
         return render_template('login.html', error=error)
 
 
@@ -71,10 +74,10 @@ def login():
         # GET request - show login form
         return render_template('login.html')
 
-# TODO
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-
+    global currentAcc
     error = None
 
     if request.method == 'POST':
@@ -107,8 +110,10 @@ def register():
         db.session.add(new_record)
         db.session.commit()
 
+        currentAcc = a_user
+
         #once account creation is successful, go to homepage
-        return render_template('home.html')
+        return redirect(url_for('home', a_user=currentAcc))
 
 
     else:
@@ -118,11 +123,72 @@ def register():
 
 # TODO
 @app.route('/home', methods=['GET', 'POST'])
-def home(a_user):
-    return render_template('home.html')
+def home():
+    global currentAcc
+    if (currentAcc != None):
+        error = None
+        return render_template('home.html', a_user=currentAcc)
+    else:
+        currentAcc = None
+        return redirect(url_for('login'))
 
 
-app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
+@app.route('/createEvent', methods=['GET', 'POST'])
+def createEvent():
+    global currentAcc
+    print(currentAcc)
+    if (currentAcc != None):
+        error = None
+        # check method used for request
+        if request.method == 'POST':
+            # get event name
+            event_name = request.form['event_name']
+            # get event date
+            event_date = request.form['event_date']
+            # get event time
+            # tzinfo attribute needs to be kept for time
+            event_time = request.form['event_time']
+            # get event location
+            event_location = request.form['event_location']
+            # get event description
+            description = request.form['description']
+            # get event image
+            # TODO
+
+            # TODO Parse date and time form inputs into date and time datetime
+                # objects?
+
+            # create date stamp from date and time
+            event_datetime = datetime.datetime.combine(event_date, event_time)
+
+
+            try:
+                UserID, eventName, dateTime, location, description
+                new_event = Event(currentAcc.id, event_name, event_datetime, event_location, description)
+                db.session.add(new_event)
+                db.session.commit()
+
+                #once event creation is successful, go back to homepage
+                return redirect(url_for('home', a_user=currentAcc))
+
+            except Exception as e:
+                # event creation failed
+                error = str(e)
+                print(e)
+                # send flash message
+                flash(error)
+
+        else:
+            # GET request - show createEvent form
+            return render_template('createEvent.html', a_user=currentAcc)
+
+    else:
+        currentAcc = None
+        return redirect(url_for('login'))
+
+
+app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)), debug=True)
+
 
 # To see the web page in your web browser, go to the url,
 #   http://127.0.0.1:5000
