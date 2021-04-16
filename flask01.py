@@ -132,15 +132,16 @@ def rsvp(event_id):
         db.session.commit(new_rsvp)
 
         #Retrieve event information to be displayed on RSVP page
-        event_creator = db.session.query(Event.name).filter_by(id=event_id).one()
-        event_datetime = db.session.query(Event.dateTime).filter_by(id=event_id).one()
-        event_time = '' #TODO (get time from event_datetime)
-        event_date = '' #TODO (get d/m/y from event_datetime)
+        event = db.session.query(Event).filter_by(id=event_id).one()
+        event_creator = db.session.query(User.firstName).filterby(event.UserID)
+        event_time = event.dateTime #TODO (get time from event_datetime)
+        event_date = event.dateTime #TODO (get d/m/y from event_datetime)
 
-        return render_template("rsvp.html", event_creator=event_creator,
-                                            event_time = event_time,
-                                            event_date = event_date,
-                                            user = session['user'])
+        return render_template("rsvp.html", event_name=event.eventName,
+                                            event_time=event_time,
+                                            event_date=event_date,
+                                            event_creator=event_creator,
+                                            user=session['user'])
 
 app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
 
