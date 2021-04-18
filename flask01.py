@@ -101,13 +101,29 @@ def rsvp(event_id):
             db.session.add(new_rsvp)
             db.session.commit()
 
-        #Retrieve event information to be displayed on RSVP page
+        rsvp_id = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first()
 
+        #Retrieve event information to be displayed on RSVP page
         event = db.session.query(Event).filter_by(id=event_id).one()
         event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
-        return render_template("rsvp.html", event=event, event_organizer=event_organizer, user=session['user'])
+        return render_template("rsvp.html", event=event, event_organizer=event_organizer, rsvp_id = rsvp_id, user=session['user'])
     else:
         # user is not in session redirect to login
+        return redirect(url_for('login'))
+
+@app.route('/event/<event_id>/cancel-rsvp')
+def cancel_rsvp(event_id):
+    if session.get('user'):
+        eventName = db.session.query(Event.eventName).filter_by(id=event_id).one()[0]
+        entryExists = db.session.query(RSVP.id).filter_by(user_id = session['user_id'], event_id=event_id).first() is not None
+        if entryExists:
+            #Delete from database
+            my_rsvp = db.session.query(RSVP).filter_by(user_id = session['user_id'], event_id=event_id).one()
+            db.session.delete(my_rsvp)
+            db.session.commit()
+
+        return  render_template("cancel-rsvp.html", entryExists=entryExists, eventName=eventName)
+    else:
         return redirect(url_for('login'))
 
 @app.route('/create-event', methods=['GET', 'POST'])
