@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Event Scheduler App">
+        <title>RSVP</title>
+        <!-- styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    </head>
+
+    <body>
+        <h2>RSVP Successful</h2>
+        <p>Congratulations! You have successfully RSVP'd to {{event.eventName}}</p>
+
+        <ul>
+            <li>Date: {{event.dateTime.strftime("%#m/%#d/%Y")}}</li>
+            <li>Time: {{event.dateTime.strftime("%#I:%M%p")}}</li>
+            <li>Organizer: {{ event_organizer }}</li>
+
+        </ul>
+
+        <form action="{{ url_for('home') }}" method="get">
+            <input type="submit" value="OK">
+        </form>
+        <form action="{{ url_for('cancel_rsvp', event_id = event.id) }}" method="get">
+            <input type="submit" value="Cancel RSVP">
+        </form>
+
+
+    </body>
+</html>

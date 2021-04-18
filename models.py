@@ -5,18 +5,17 @@ from datetime import datetime
 class Event(db.Model):
     __tablename__ = "Event"
     id = db.Column(db.Integer, primary_key=True)
-    UserID = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     eventName = db.Column(db.String(150))
-    dateTime = db.Column(db.DateTime(100))
+    dateTime = db.Column(db.DateTime())
     location = db.Column(db.String(100))
     description = db.Column(db.Text(500))
 
-    # relations
-    rvsps = db.relationship('RSVP')
+    # relations: 1 event has many rsvps
+    rvsps = db.relationship('RSVP', backref="Event", lazy=True)
 
-    def __init__(self, UserID, eventName, dateTime, location, description):
-        self.UserID = UserID
+    def __init__(self, user_id, eventName, dateTime, location, description):
+        self.user_id = user_id
         self.eventName = eventName
         self.dateTime = dateTime
         self.location = location
@@ -28,11 +27,11 @@ class User(db.Model):
     email = db.Column(db.String(200))
     firstName = db.Column(db.String(200))
     lastName = db.Column(db.String(200))
-    password = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
-    #1 user -> many events, 1 user -> many rsvps
-    events = db.relationship('Event')
-    rsvps = db.relationship('RSVP')
+    #relations: 1 user -> many events, 1 user -> many rsvps
+    events = db.relationship("Event", backref="User", lazy=True)
+    rsvps = db.relationship("RSVP", backref="User", lazy=True)
 
     def __init__(self, email, firstName, lastName, password):
         self.email = email
@@ -50,10 +49,10 @@ class User(db.Model):
 class RSVP(db.Model):
     __tablename__ = "RSVP"
     id = db.Column(db.Integer, primary_key=True)
-    UserID = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    EventID = db.Column(db.Integer, db.ForeignKey('Event.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey("Event.id"), nullable=False)
 
 
-    def __init__(self, UserID, eventID):
-        self.UserID = UserID
-        self.EventID = eventID
+    def __init__(self, user_id, event_id):
+        self.user_id = user_id
+        self.event_id = event_id
