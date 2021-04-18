@@ -12,8 +12,9 @@ from models import RSVP as RSVP
 from models import Event as Event
 from flask import session
 from flask import flash
-from forms import CreateEventForm
+from forms import CreateEventForm, RegisterForm
 from datetime import datetime
+import bcrypt
 import re
 
 
@@ -73,49 +74,30 @@ def login():
         # GET request - show login form
         return render_template('login.html')
 
-# TODO
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST', 'GET'])
 def register():
+    form = RegisterForm()
 
-    error = None
-
-    if request.method == 'POST':
-        #get first name
-        first_name = request.form['first_name']
-        #get last name
-        last_name = request.form['last_name']
-        # get email data
-        in_email = request.form['email']
-        # get password data
-        password = request.form['password']
-
-        #checks if email is in a proper format
-        email_correct = re.search('^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$', in_email) is not None
-
-        if email_correct == False:
-            error = 'Please enter a valid email address '
-            return render_template('register.html', error=error)
-
-        # searches database to see if email has been used
-        user_exists = db.session.query(User.id).filter_by(email = in_email).first() is not None
-
-        if user_exists == True:
-            error = 'An email for this account has already been registered'
-            return render_template('register.html', error=error)
-
-        print(first_name, last_name, in_email, user_exists, 'Email correct: ', email_correct, 'User exists: ', user_exists)
-
-        new_record = User(in_email, first_name, last_name, password)
-        db.session.add(new_record)
+    if request.method == 'POST' and form.validate_on_submit():
+        # salt and hash password
+        h_password = bcrypt.hashpw(
+            request.form['password'].encode('utf-8'), bcrypt.gensalt())
+        # get entered user data
+        first_name = request.form['firstname']
+        last_name = request.form['lastname']
+        # create user model
+        new_user = User(request.form['email'], first_name, last_name, h_password)
+        # add user to database and commit
+        db.session.add(new_user)
         db.session.commit()
-
-        #once account creation is successful, go to homepage
-        return render_template('home.html')
-
-
+        # save the user's name to the session
+        session['user'] = first_name
+        session['user_id'] = new_user.id  # access id value from user model of this newly added user
+        # show user dashboard view
+        return redirect(url_for('login'))
     else:
-        # GET request - show registration form
-        return render_template('register.html')
+        # something went wrong - display register view
+        return render_template('register.html', form=form)
 
 
 # TODO

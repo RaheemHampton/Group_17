@@ -27,7 +27,7 @@ class User(db.Model):
     email = db.Column(db.String(200))
     firstName = db.Column(db.String(200))
     lastName = db.Column(db.String(200))
-    password = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     #relations: 1 user -> many events, 1 user -> many rsvps
     events = db.relationship("Event", backref="User", lazy=True)
