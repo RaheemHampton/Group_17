@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Create an account">
+        <title>Event Scheduler</title>
+    </head>
+<body>
+    <div class="formwrapper">
+        <h2 class="title">Create event</h2>
+            <form method="POST" action="/create-event">
+                <div class="form-field">{{ form.eventname.label }} {{ form.eventname }}
+                    {% if form.eventname.errors %}
+                    <ul class="errors">
+                        {% for error in form.eventname.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="form-field">
+                    <label for = "event_date">Date </label>
+                    <input type="date" id="event_date" name="event_date">
+                    {% if date_error %}
+                    <ul class="errors">
+                        <li>{{ date_error }}</li>
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="form-field">
+                    <label for = "event_time">Time </label>
+                    <input type="time" id="event_time" name="event_time">
+                    {% if time_error %}
+                    <ul class="errors">
+                        <li>{{ time_error }}</li>
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="form-field">{{ form.location.label }} {{ form.location }}
+                    {% if form.location.errors %}
+                    <ul class="errors">
+                        {% for error in form.location.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="form-field">{{ form.description.label }} {{ form.description }}
+                    {% if form.description.errors %}
+                    <ul class="errors">
+                        {% for error in form.description.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="form-field">
+                    <input type="submit" value="Submit"/>
+                </div>
+
+            </form>
+
+        </div>
+
+</body>
+</html>
