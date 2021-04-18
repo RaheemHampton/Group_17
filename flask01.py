@@ -12,6 +12,8 @@ from models import RSVP as RSVP
 from models import Event as Event
 from flask import session
 from flask import flash
+from forms import CreateEventForm
+from datetime import datetime
 import re
 
 
@@ -124,24 +126,75 @@ def register():
 def home(a_user):
     return render_template('home.html')
 
-@app.route('event/<event_id>/rsvp', methods=['POST'])
+@app.route('/event/<event_id>/rsvp')
 def rsvp(event_id):
-    if session.get('user'):
-        #RSVP entry is created with the user's ID and event ID
+    #### ----- REMOVE ONCE LOGIN/CREATE ACCOUNT IS FULLY IMPLEMENTED ----- ####
+    session['user_id'] = 1
+    session['user'] = 'Milan'
+
+    #check that RSVP doesn't already exist
+    entry_exists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
+    #RSVP entry is created with the user's ID and event ID if it doesn't exist yet
+    if(entry_exists == False):
         new_rsvp = RSVP(session['user_id'], event_id)
-        db.session.commit(new_rsvp)
+        db.session.add(new_rsvp)
+        db.session.commit()
 
-        #Retrieve event information to be displayed on RSVP page
-        event = db.session.query(Event).filter_by(id=event_id).one()
-        event_creator = db.session.query(User.firstName).filterby(event.UserID)
-        event_time = event.dateTime #TODO (get time from event_datetime)
-        event_date = event.dateTime #TODO (get d/m/y from event_datetime)
+    #Retrieve event information to be displayed on RSVP page
 
-        return render_template("rsvp.html", event_name=event.eventName,
-                                            event_time=event_time,
-                                            event_date=event_date,
-                                            event_creator=event_creator,
-                                            user=session['user'])
+    event = db.session.query(Event).filter_by(id=event_id).one()
+    event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
+    return render_template("rsvp.html", event=event, event_organizer=event_organizer, user=session['user'])
+
+@app.route('/create-event', methods=['GET', 'POST'])
+def create_event():
+
+    #### ----- REMOVE ONCE LOGIN/CREATE ACCOUNT IS FULLY IMPLEMENTED ----- ####
+    session['user_id'] = 1
+    session['user'] = 'Milan'
+
+    form = CreateEventForm()
+
+    date_error = False
+    time_error = False
+
+    if request.method == 'POST' and form.validate_on_submit():
+        event_name = request.form['eventname']
+
+        date = request.form['event_date']
+        if date == '': #throw error if date field is empty
+            date_error = ('Please enter a date')
+
+        time = request.form['event_time']
+        if time == '': #throw error if time field is empty
+            time_error = 'Please enter a time'
+
+        location = request.form['location']
+
+        description = request.form['description']
+
+
+        print(date + ' ' + time)
+
+        print(date_error)
+        print(time_error)
+
+        # If no date/time errors, create datetime object & commit all to database
+        if (date_error == False) and (time_error == False):
+            # combine date and time fields to create dateTime object
+            date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
+
+            #storing event info (including newly created datetime object) in database
+            new_record = Event(session['user_id'], event_name, date_time, location, description)
+            db.session.add(new_record)
+            db.session.commit()
+        return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+    else:
+        # something went wrong - display register view
+        return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+
+
+
 
 app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
 

@@ -11,21 +11,20 @@
 
     <body>
         <h2>RSVP Successful</h2>
-        <p>Congratulations! You have successfully RSVP'd to {{event_name}}</p>
+        <p>Congratulations! You have successfully RSVP'd to {{event.eventName}}</p>
 
         <ul>
-            <li>Date: {{event_date}}</li>
-            <li>Time: {{event_time}}</li>
-            <li>Organizer: {{event_creator}}</li>
+            <li>Date: {{event.dateTime.strftime("%#m/%#d/%Y")}}</li>
+            <li>Time: {{event.dateTime.strftime("%#I:%M%p")}}</li>
+            <li>Organizer: {{ event_organizer }}</li>
 
         </ul>
 
-        <form action="{{ url_for('cancel_rsvp', event_id=event.id) }}" method="post">
-            <input type="submit" value="Cancel RSVP">
-        </form>
-
-        <form action="{{ url_for('home', note_id=note.id) }}" method="get">
+        <form action="{{ url_for('login') }}" method="get">
             <input type="submit" value="OK">
+        </form>
+        <form action="{{ url_for('login') }}" method="get">
+            <input type="submit" value="Cancel RSVP">
         </form>
 
 
