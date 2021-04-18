@@ -37,7 +37,6 @@ with app.app_context():
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     error = None
     # check method used for request
     if request.method == 'POST':
@@ -69,8 +68,6 @@ def login():
             # email was not listed in the db for any user, disaply error message
             error = 'Email is not found!'
         return render_template('login.html', error=error)
-
-
 
     else:
         # GET request - show login form
