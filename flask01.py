@@ -12,7 +12,7 @@ from models import RSVP as RSVP
 from models import Event as Event
 from flask import session
 from flask import flash
-from forms import CreateEventForm, RegisterForm
+from forms import CreateEventForm, RegisterForm, LoginForm
 from datetime import datetime
 import bcrypt
 import re
@@ -38,41 +38,26 @@ with app.app_context():
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
-    # check method used for request
-    if request.method == 'POST':
-        # get email data
-        in_email = request.form['email']
-        # get password data
-        in_password = request.form['password']
+    login_form = LoginForm()
+    # validate_on_submit only validates using POST
+    if login_form.validate_on_submit():
+        # we know user exists. We can use one()
+        the_user = db.session.query(User).filter_by(email=request.form['email']).one()
+        # user exists check password entered matches stored password
+        if bcrypt.checkpw(request.form['password'].encode('utf-8'), the_user.password):
+            # password match add user info to session
+            session['user'] = the_user.firstName
+            session['user_id'] = the_user.id
+            # render view
+            return redirect(url_for('home'))
 
-        # create date stamp
-        from datetime import date
-        today = date.today()
-        today = today.strftime("%m-%d-%Y")
-
-        # retrieve user from database
-        try:
-            a_user = db.session.query(User).filter_by(email=in_email).one()
-
-            # check if was correct password
-            if a_user.pwdCheck(in_password):
-                # password was correct, redirect to home page for user
-                flash('Successful login')
-                return redirect(url_for('home', a_user))
-            else:
-                # TODO
-                # password was not correct, display error message
-                error='Password is incorrect!'
-
-        except:
-            # email was not listed in the db for any user, disaply error message
-            error = 'Email is not found!'
-        return render_template('login.html', error=error)
-
+        # password check failed
+        # set error message to alert user
+        login_form.password.errors = ["Incorrect username or password."]
+        return render_template("login.html", form=login_form)
     else:
-        # GET request - show login form
-        return render_template('login.html')
+        # form did not validate or GET request
+        return render_template("login.html", form=login_form)
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -102,75 +87,73 @@ def register():
 
 # TODO
 @app.route('/home', methods=['GET', 'POST'])
-def home(a_user):
+def home():
     return render_template('home.html')
 
 @app.route('/event/<event_id>/rsvp')
 def rsvp(event_id):
-    #### ----- REMOVE ONCE LOGIN/CREATE ACCOUNT IS FULLY IMPLEMENTED ----- ####
-    session['user_id'] = 1
-    session['user'] = 'Milan'
+    if session.get('user'):
+        #check that RSVP doesn't already exist
+        entry_exists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
+        #RSVP entry is created with the user's ID and event ID if it doesn't exist yet
+        if(entry_exists == False):
+            new_rsvp = RSVP(session['user_id'], event_id)
+            db.session.add(new_rsvp)
+            db.session.commit()
 
-    #check that RSVP doesn't already exist
-    entry_exists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
-    #RSVP entry is created with the user's ID and event ID if it doesn't exist yet
-    if(entry_exists == False):
-        new_rsvp = RSVP(session['user_id'], event_id)
-        db.session.add(new_rsvp)
-        db.session.commit()
+        #Retrieve event information to be displayed on RSVP page
 
-    #Retrieve event information to be displayed on RSVP page
-
-    event = db.session.query(Event).filter_by(id=event_id).one()
-    event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
-    return render_template("rsvp.html", event=event, event_organizer=event_organizer, user=session['user'])
+        event = db.session.query(Event).filter_by(id=event_id).one()
+        event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
+        return render_template("rsvp.html", event=event, event_organizer=event_organizer, user=session['user'])
+    else:
+        # user is not in session redirect to login
+        return redirect(url_for('login'))
 
 @app.route('/create-event', methods=['GET', 'POST'])
 def create_event():
+    if session.get('user'):
+        form = CreateEventForm()
 
-    #### ----- REMOVE ONCE LOGIN/CREATE ACCOUNT IS FULLY IMPLEMENTED ----- ####
-    session['user_id'] = 1
-    session['user'] = 'Milan'
+        date_error = False
+        time_error = False
 
-    form = CreateEventForm()
+        if request.method == 'POST' and form.validate_on_submit():
+            event_name = request.form['eventname']
 
-    date_error = False
-    time_error = False
+            date = request.form['event_date']
+            if date == '': #throw error if date field is empty
+                date_error = ('Please enter a date')
 
-    if request.method == 'POST' and form.validate_on_submit():
-        event_name = request.form['eventname']
+            time = request.form['event_time']
+            if time == '': #throw error if time field is empty
+                time_error = 'Please enter a time'
 
-        date = request.form['event_date']
-        if date == '': #throw error if date field is empty
-            date_error = ('Please enter a date')
+            location = request.form['location']
 
-        time = request.form['event_time']
-        if time == '': #throw error if time field is empty
-            time_error = 'Please enter a time'
+            description = request.form['description']
 
-        location = request.form['location']
+            print(date + ' ' + time)
 
-        description = request.form['description']
+            print(date_error)
+            print(time_error)
 
+            # If no date/time errors, create datetime object & commit all to database
+            if (date_error == False) and (time_error == False):
+                # combine date and time fields to create dateTime object
+                date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
 
-        print(date + ' ' + time)
-
-        print(date_error)
-        print(time_error)
-
-        # If no date/time errors, create datetime object & commit all to database
-        if (date_error == False) and (time_error == False):
-            # combine date and time fields to create dateTime object
-            date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
-
-            #storing event info (including newly created datetime object) in database
-            new_record = Event(session['user_id'], event_name, date_time, location, description)
-            db.session.add(new_record)
-            db.session.commit()
-        return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+                #storing event info (including newly created datetime object) in database
+                new_record = Event(session['user_id'], event_name, date_time, location, description)
+                db.session.add(new_record)
+                db.session.commit()
+            return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+        else:
+            # something went wrong - display register view
+            return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
     else:
-        # something went wrong - display register view
-        return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+        # user is not in session redirect to login
+        return redirect(url_for('login'))
 
 
 
