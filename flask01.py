@@ -173,6 +173,26 @@ def create_event():
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
+def delete_event(event_id):
+    @app.route('/event/<event_id>/delete-event')
+    if session.get('user'):
+        EntryExists = db.session.query(Event.eventName)
+        eventName = db.session.query(Event.eventName)
+        if entryExists:
+            db.session.delete(db.session.query(Event.eventName))
+            db.session.commit
+        return render_template('/delete-event.html', form = form, time_error=time_error, date_error=date_error)
+    else:
+        return render_template('delete-event.heml', form = form, time_error=time_error, date_error=date_error)
+else:
+return redirect(url_for('login'))
+
+
+
+
+
+
+
 
 
 
