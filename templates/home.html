@@ -10,29 +10,48 @@
     </head>
     <body>
 
-    <table>
-            <tr>
-                <th>Attending</th>
-                <th>Event</th>
-                <th>Organizer</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Location</th>
-            </tr>
-        {% for event, user, rsvp in table %}
-            <tr>
-            {% if rsvp.user_id == current_user or event.user_id == current_user %}
-                <td>*</td>
-            {% else %}
-                <td> </td>
-            {% endif %}
-                <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ event.eventName }}</a></td>
-                <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ user.firstName }}</a></td>
-                <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
-                <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
-                <td><a>{{ event.location }}</a></td>
-            </tr>
-        {% endfor %}
-        </table>
+
+    <header>
+        <div>
+        <a href="/home" class="headtext">Event Planner</a>
+            <a id="upperRight1"> Hello, {{user}}!</a>
+        </div>
+        <a id="upperRight2" href="">Sign Out</a>
+    </header>
+
+
+
+    <br>
+        <div class="formwrapper">
+
+            <form action="{{ url_for('create_event') }}" method="post">
+                  <input type="submit" value="Create event" style="float: right">
+            </form>
+
+            <table>
+                <tr>
+                    <th>Attending</th>
+                    <th>Event</th>
+                    <th>Organizer</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+                </tr>
+                {% for event, user, rsvp in table %}
+                <tr>
+                {% if rsvp.user_id == current_user or event.user_id == current_user %}
+                    <td>*</td>
+                {% else %}
+                    <td> </td>
+                {% endif %}
+                    <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ event.eventName }}</a></td>
+                    <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ user.firstName }}</a></td>
+                    <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                    <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                    <td><a>{{ event.location }}</a></td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
     </body>
 </html>

@@ -9,9 +9,24 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
 <body>
+
+    <header>
+        <div>
+        <a href="/home" class="headtext">Event Planner</a>
+            <a id="upperRight1"> Hello, {{user}}!</a>
+        </div>
+        <a id="upperRight2" href="">Sign Out</a>
+    </header>
+
     <div class="formwrapper">
+
+    {% if event %}
+        <h2 class="title">Edit event</h2>
+            <form action = "{{ url_for('edit_event', event_id=event.id) }}" method="post">
+    {% else %}
         <h2 class="title">Create event</h2>
-            <form method="POST" action="/create-event">
+            <form action="/create-event" method="post">
+    {% endif %}
                 <div class="form-field">{{ form.eventname.label }} {{ form.eventname }}
                     {% if form.eventname.errors %}
                     <ul class="errors">
@@ -23,7 +38,7 @@
                 </div>
                 <div class="form-field">
                     <label for = "event_date">Date </label>
-                    <input type="date" id="event_date" name="event_date">
+                    <input type="date" id="event_date" name="event_date" value="{{date}}">
                     {% if date_error %}
                     <ul class="errors">
                         <li>{{ date_error }}</li>
@@ -32,7 +47,7 @@
                 </div>
                 <div class="form-field">
                     <label for = "event_time">Time </label>
-                    <input type="time" id="event_time" name="event_time">
+                    <input type="time" id="event_time" name="event_time" value="{{time}}">
                     {% if time_error %}
                     <ul class="errors">
                         <li>{{ time_error }}</li>
@@ -57,9 +72,7 @@
                     </ul>
                     {% endif %}
                 </div>
-                <form action="{{ url_for('home') }}" method="get">
-                    <input type="submit" value="Submit">
-                </form>
+                <input type="submit" value="Submit"/>
 
             </form>
 
