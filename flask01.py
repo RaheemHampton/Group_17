@@ -88,6 +88,8 @@ def register():
 # TODO
 @app.route('/home', methods=['GET', 'POST'])
 def home():
+
+    
     return render_template('home.html')
 
 @app.route('/event/<event_id>/rsvp')

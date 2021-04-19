@@ -4,13 +4,50 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Event Scheduler App">
-        <title>Event Scheduler</title>
+        <title>Events | Event Scheduler</title>
         <!-- styles -->
         <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
     <body>
-        
-        <h1>Homepage</h1>
 
+    <nav>
+        <a href="{{ url_for('home') }}"> Home</a>
+        <a style="float: right"> Hello, {{user.name}}!</a>
+    </nav>
+
+    <nav>
+        <input type="button" value="Sign Out" style="float: right">
+    </nav>
+
+    <h1> </h1>
+
+    <!-- Search Bar -->
+        <form name="search">
+            <input type="search" id="query" name="q" placeholder="Search for an event...">
+            <button>Search</button>
+        </form>
+    <!-- End of Search Bar -->
+
+    <!-- Create an Event Button  **Connect to Create Event URL**-->
+    <input href="{{ url_for('createEvent') }}" method="GET" style="float: right" type="button" value="Create an Event">
+    <!-- End of Button -->
+
+
+    <!-- Labels/Info of Events -->
+        <table name="labels">
+            <tr>
+                <th>Event</th>
+                <th>Organizer</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Location</th>
+            </tr>
+            {% for event in events %}
+            <tr>
+                <td><a href="{{ url_for('get_note', note_id=note.id) }}">{{ note.title }}</a></td>
+                <td>{{ note.date }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </body>
 </html>
