@@ -86,11 +86,16 @@ def register():
 
 
 # TODO
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/home')
 def home():
-
-    
-    return render_template('home.html')
+    # check if a user is saved in session
+    if session.get('user'):
+        table = db.session.query(Event, User).join(User).filter(Event.user_id == User.id).all()
+        for a, b in table:
+            print(a, b)
+        return render_template("home.html", user=session['user'], table=table)
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/event/<event_id>/rsvp')
 def rsvp(event_id):
@@ -173,14 +178,15 @@ def create_event():
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
-@app.route('/event/<event_id>', methods=['GET', 'POST'])
+@app.route('/event/<event_id>')
 def view_event(event_id):
     if session.get('user'):
         #retrieve events from database
-        my_event = db.session.query(Event).filter_by(user_id=session['user_id']).one()
-        return render_template('/event/<event_id>', my_event=my_event )
+        event = db.session.query(Event).filter_by(id = event_id).one()
+        event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
+        return render_template('event.html', event=event, event_organizer=event_organizer, current_user_id = session['user_id'])
     else:
-        return render_template(url_for('login'))
+        return redirect(url_for('login'))
 
 app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
 

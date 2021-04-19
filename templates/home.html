@@ -10,31 +10,7 @@
     </head>
     <body>
 
-    <nav>
-        <a href="{{ url_for('home') }}"> Home</a>
-        <a style="float: right"> Hello, {{user.name}}!</a>
-    </nav>
-
-    <nav>
-        <input type="button" value="Sign Out" style="float: right">
-    </nav>
-
-    <h1> </h1>
-
-    <!-- Search Bar -->
-        <form name="search">
-            <input type="search" id="query" name="q" placeholder="Search for an event...">
-            <button>Search</button>
-        </form>
-    <!-- End of Search Bar -->
-
-    <!-- Create an Event Button  **Connect to Create Event URL**-->
-    <input href="{{ url_for('createEvent') }}" method="GET" style="float: right" type="button" value="Create an Event">
-    <!-- End of Button -->
-
-
-    <!-- Labels/Info of Events -->
-        <table name="labels">
+    <table>
             <tr>
                 <th>Event</th>
                 <th>Organizer</th>
@@ -42,10 +18,13 @@
                 <th>Time</th>
                 <th>Location</th>
             </tr>
-            {% for event in events %}
+            {% for event, user in table %}
             <tr>
-                <td><a href="{{ url_for('get_note', note_id=note.id) }}">{{ note.title }}</a></td>
-                <td>{{ note.date }}</td>
+                <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ event.eventName }}</a></td>
+                <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ user.firstName }}</a></td>
+                <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                <td><a>{{ event.location }}</a></td>
             </tr>
             {% endfor %}
         </table>

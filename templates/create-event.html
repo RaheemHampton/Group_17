@@ -5,6 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Create an account">
         <title>Event Scheduler</title>
+        <!-- styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
 <body>
     <div class="formwrapper">
@@ -55,9 +57,9 @@
                     </ul>
                     {% endif %}
                 </div>
-                <div class="form-field">
-                    <input type="submit" value="Submit"/>
-                </div>
+                <form action="{{ url_for('home') }}" method="get">
+                    <input type="submit" value="Submit">
+                </form>
 
             </form>
 
