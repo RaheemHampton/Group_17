@@ -163,6 +163,48 @@ def create_event():
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
+@app.route('/event/<event_id>/edit', methods=['GET', 'POST'])
+def edit_event(event_id):
+    if session.get('user'):
+        form = CreateEventForm()
+
+        date_error = False
+        time_error = False
+
+        if request.method == 'POST' and form.validate_on_submit():
+            event_name = request.form['eventname']
+
+            date = request.form['event_date']
+            if date == '': #throw error if date field is empty
+                date_error = ('Please enter a date')
+
+            time = request.form['event_time']
+            if time == '': #throw error if time field is empty
+                time_error = 'Please enter a time'
+
+            location = request.form['location']
+
+            description = request.form['description']
+
+            # If no date/time errors, create datetime object & commit all to database
+            if (date_error == False) and (time_error == False):
+                # combine date and time fields to create dateTime object
+                date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
+
+                #storing event info (including newly created datetime object) in database
+                new_record = Event(session['user_id'], event_name, date_time, location, description)
+                db.session.add(new_record)
+                db.session.commit()
+            return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+        else:
+            #Get request - show new note form to edit note
+            #retreive event from database
+            my_event = db.session.query(Event).filter_by(id=event_id)
+            return render_template('create-event.html', event = my_event, user=session['user'])
+    else:
+        # user is not in session redirect to login
+        return redirect(url_for('login'))
+
 @app.route('/event/<event_id>')
 def view_event(event_id):
     if session.get('user'):
