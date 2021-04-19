@@ -6,7 +6,6 @@ from flask import Flask   # Flask is the web app that we will customize
 from flask import render_template
 from flask import request, redirect, url_for
 from database import db
-from models import Event as event
 from models import User as User
 from models import RSVP as RSVP
 from models import Event as Event
@@ -90,46 +89,37 @@ def register():
 def home():
     # check if a user is saved in session
     if session.get('user'):
-        table = db.session.query(Event, User).join(User).filter(Event.user_id == User.id).all()
-        for a, b in table:
-            print(a, b)
-        return render_template("home.html", user=session['user'], table=table)
+        #user_rsvps = db.session.query(Event.id).filter_by(Event.user_id == session['user_id'])
+        table = db.session.query(Event, User, RSVP).join(Event, Event.user_id==User.id).outerjoin(RSVP, Event.id == RSVP.event_id and RSVP.user_id == session['user_id']).all()
+        #Gets events where current user has RSVP'd to
+        return render_template("home.html", user=session['user'], current_user=session['user_id'], table=table)
     else:
         return redirect(url_for('login'))
 
-@app.route('/event/<event_id>/rsvp')
+@app.route('/event/<event_id>/rsvp', methods=['POST', 'GET'])
 def rsvp(event_id):
     if session.get('user'):
-        #check that RSVP doesn't already exist
-        entry_exists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
-        #RSVP entry is created with the user's ID and event ID if it doesn't exist yet
-        if(entry_exists == False):
+        if request.method == 'POST':
             new_rsvp = RSVP(session['user_id'], event_id)
             db.session.add(new_rsvp)
             db.session.commit()
-
-        rsvp_id = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first()
-
-        #Retrieve event information to be displayed on RSVP page
-        event = db.session.query(Event).filter_by(id=event_id).one()
-        event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
-        return render_template("rsvp.html", event=event, event_organizer=event_organizer, rsvp_id = rsvp_id, user=session['user'])
+            return redirect(url_for('view_event', rsvp_exists=True, event_id=event_id))
+        else:
+            return redirect(url_for('view_event', event_id=event_id, rsvp_exists=True))
     else:
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
-@app.route('/event/<event_id>/cancel-rsvp')
+@app.route('/event/<event_id>/cancel-rsvp', methods=['POST', 'GET'])
 def cancel_rsvp(event_id):
     if session.get('user'):
-        eventName = db.session.query(Event.eventName).filter_by(id=event_id).one()[0]
-        entryExists = db.session.query(RSVP.id).filter_by(user_id = session['user_id'], event_id=event_id).first() is not None
-        if entryExists:
-            #Delete from database
+        if request.method == 'POST':
             my_rsvp = db.session.query(RSVP).filter_by(user_id = session['user_id'], event_id=event_id).one()
             db.session.delete(my_rsvp)
             db.session.commit()
-
-        return  render_template("cancel-rsvp.html", entryExists=entryExists, eventName=eventName)
+            return redirect(url_for('view_event', rsvp_exists=False, event_id=event_id))
+        else:
+            return redirect(url_for('view_event', event_id=event_id, rsvp_exists=False))
     else:
         return redirect(url_for('login'))
 
@@ -156,11 +146,6 @@ def create_event():
 
             description = request.form['description']
 
-            print(date + ' ' + time)
-
-            print(date_error)
-            print(time_error)
-
             # If no date/time errors, create datetime object & commit all to database
             if (date_error == False) and (time_error == False):
                 # combine date and time fields to create dateTime object
@@ -182,9 +167,10 @@ def create_event():
 def view_event(event_id):
     if session.get('user'):
         #retrieve events from database
+        rsvpExists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
         event = db.session.query(Event).filter_by(id = event_id).one()
         event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
-        return render_template('event.html', event=event, event_organizer=event_organizer, current_user_id = session['user_id'])
+        return render_template('event.html', event=event, event_organizer=event_organizer, rsvpExists=rsvpExists, current_user_id = session['user_id'])
     else:
         return redirect(url_for('login'))
 

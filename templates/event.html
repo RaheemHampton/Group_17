@@ -17,18 +17,28 @@
             <li>Time: {{event.dateTime.strftime("%#I:%M%p")}}</li>
             <li>Location: {{ event.location }}</li>
             <li>Organizer: {{ event_organizer }}</li>
+            <li>Description: {{ event.description }}</li>
 
         </ul>
 
-        {% if event.id == current_user_id %}
-        <form action="{{ url_for('home') }}" method="get">
-            <input type="submit" value="Edit">
-        </form>
+        {% if event.user_id == current_user_id %}
+            <form action="{{ url_for('home') }}" method="get">
+                <input type="submit" value="Edit">
+            </form>
         {% else %}
-        <form action="{{ url_for('rsvp', event_id=event.id) }}">
-            <input type="submit" value="RSVP">
-        </form>
+            {% if rsvpExists == False %}
+                <form action="{{ url_for('rsvp', event_id=event.id) }}" method="post">
+                    <input type="submit" value="RSVP">
+                </form>
+            {% else %}
+                <form action="{{ url_for('cancel_rsvp', event_id=event.id) }}" method="post">
+                    <input type="submit" value="Cancel RSVP">
+                </form>
+            {% endif %}
         {% endif %}
+        <form action="{{ url_for('home') }}">
+            <input type="submit" value="Home">
+        </form>
 
 
     </body>
