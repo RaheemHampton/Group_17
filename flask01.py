@@ -6,7 +6,6 @@ from flask import Flask   # Flask is the web app that we will customize
 from flask import render_template
 from flask import request, redirect, url_for
 from database import db
-from models import Event as event
 from models import User as User
 from models import RSVP as RSVP
 from models import Event as Event
@@ -49,7 +48,7 @@ def login():
             session['user'] = the_user.firstName
             session['user_id'] = the_user.id
             # render view
-            return redirect(url_for('home'))
+            return redirect(url_for('home', user=session['user']))
 
         # password check failed
         # set error message to alert user
@@ -86,45 +85,41 @@ def register():
 
 
 # TODO
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/home')
 def home():
+    # check if a user is saved in session
+    if session.get('user'):
+        #user_rsvps = db.session.query(Event.id).filter_by(Event.user_id == session['user_id'])
+        table = db.session.query(Event, User, RSVP).join(Event, Event.user_id==User.id).outerjoin(RSVP, Event.id == RSVP.event_id and RSVP.user_id == session['user_id']).all()
+        #Gets events where current user has RSVP'd to
+        return render_template("home.html", user=session['user'], current_user=session['user_id'], table=table)
+    else:
+        return redirect(url_for('login'))
 
-    
-    return render_template('home.html')
-
-@app.route('/event/<event_id>/rsvp')
+@app.route('/event/<event_id>/rsvp', methods=['POST', 'GET'])
 def rsvp(event_id):
     if session.get('user'):
-        #check that RSVP doesn't already exist
-        entry_exists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
-        #RSVP entry is created with the user's ID and event ID if it doesn't exist yet
-        if(entry_exists == False):
+        if request.method == 'POST':
             new_rsvp = RSVP(session['user_id'], event_id)
             db.session.add(new_rsvp)
             db.session.commit()
-
-        rsvp_id = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first()
-
-        #Retrieve event information to be displayed on RSVP page
-        event = db.session.query(Event).filter_by(id=event_id).one()
-        event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
-        return render_template("rsvp.html", event=event, event_organizer=event_organizer, rsvp_id = rsvp_id, user=session['user'])
+            return redirect(url_for('view_event', rsvp_exists=True, event_id=event_id, user=session['user']))
+        else:
+            return redirect(url_for('view_event', event_id=event_id, rsvp_exists=True, user=session['user']))
     else:
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
-@app.route('/event/<event_id>/cancel-rsvp')
+@app.route('/event/<event_id>/cancel-rsvp', methods=['POST', 'GET'])
 def cancel_rsvp(event_id):
     if session.get('user'):
-        eventName = db.session.query(Event.eventName).filter_by(id=event_id).one()[0]
-        entryExists = db.session.query(RSVP.id).filter_by(user_id = session['user_id'], event_id=event_id).first() is not None
-        if entryExists:
-            #Delete from database
+        if request.method == 'POST':
             my_rsvp = db.session.query(RSVP).filter_by(user_id = session['user_id'], event_id=event_id).one()
             db.session.delete(my_rsvp)
             db.session.commit()
-
-        return  render_template("cancel-rsvp.html", entryExists=entryExists, eventName=eventName)
+            return redirect(url_for('view_event', rsvp_exists=False, event_id=event_id, user=session['user']))
+        else:
+            return redirect(url_for('view_event', event_id=event_id, rsvp_exists=False, user=session['user']))
     else:
         return redirect(url_for('login'))
 
@@ -151,11 +146,6 @@ def create_event():
 
             description = request.form['description']
 
-            print(date + ' ' + time)
-
-            print(date_error)
-            print(time_error)
-
             # If no date/time errors, create datetime object & commit all to database
             if (date_error == False) and (time_error == False):
                 # combine date and time fields to create dateTime object
@@ -165,16 +155,95 @@ def create_event():
                 new_record = Event(session['user_id'], event_name, date_time, location, description)
                 db.session.add(new_record)
                 db.session.commit()
-            return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+                return redirect(url_for('home'))
+            else:
+                return render_template('create-event.html', form=form, time_error=time_error, date_error=date_error, user=session['user'])
         else:
             # something went wrong - display register view
-            return render_template('/create-event.html', form=form, time_error=time_error, date_error=date_error)
+            return render_template('create-event.html', user=session['user'], form=form)
     else:
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
+@app.route('/event/<event_id>/edit', methods=['GET', 'POST'])
+def edit_event(event_id):
+    if session.get('user'):
+        form = CreateEventForm()
+        date_error = False
+        time_error = False
+
+        if request.method == 'POST' and form.validate_on_submit():
+            event_name = request.form['eventname']
+
+            date = request.form['event_date']
+            if date == '': #throw error if date field is empty
+                date_error = ('Please enter a date')
+
+            time = request.form['event_time']
+            if time == '': #throw error if time field is empty
+                time_error = 'Please enter a time'
+
+            location = request.form['location']
+
+            description = request.form['description']
+
+            # If no date/time errors, create datetime object & commit all to database
+            updated_event = db.session.query(Event).get(event_id)
+            if (date_error == False) and (time_error == False):
+                # combine date and time fields to create dateTime object
+                date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
+
+                #storing edited event info (including edited created datetime object) in database
+                updated_event.eventName = event_name
+                updated_event.dateTime = date_time
+                updated_event.location = location
+                updated_event.description = description
+                db.session.add(updated_event)
+                db.session.commit()
+                return redirect(url_for('home', user=session['user']))
+            else:
+                return render_template('create-event.html', form=form, event=updated_event, time_error=time_error, date_error=date_error, user=session['user'])
+
+        else:
+            #Get request - show new note form to edit note
+            #retreive event from database
+            my_event = db.session.query(Event).filter_by(id=event_id).one()
+            form.eventname.data = my_event.eventName
+            form.location.data = my_event.location
+            form.description.data = my_event.description
+            date = my_event.dateTime.strftime('%Y-%m-%d')
+            time = my_event.dateTime.strftime('%H:%M')
+
+            return render_template('create-event.html', form=form, event=my_event, time=str(time), date=str(date), time_error=time_error, date_error=date_error, user=session['user'])
+    else:
+        # user is not in session redirect to login
+        return redirect(url_for('login'))
+
+@app.route('/event/<event_id>/delete', methods=['POST'])
+def delete_event(event_id):
+    print('user not got')
+    if session.get('user'):
+        print('user got')
+        #retrieve note from database
+        my_event= db.session.query(Event).filter_by(id=event_id).one()
+        print('Event ID: ', my_event.id)
+        db.session.delete(my_event)
+        db.session.commit()
+        return redirect(url_for('home'))
+    else:
+        return redirect(url_for('login'))
 
 
+@app.route('/event/<event_id>')
+def view_event(event_id):
+    if session.get('user'):
+        #retrieve events from database
+        rsvpExists = db.session.query(RSVP.id).filter_by(user_id=session['user_id'], event_id=event_id).first() is not None
+        event = db.session.query(Event).filter_by(id = event_id).one()
+        event_organizer = db.session.query(User.firstName).filter_by(id=event.user_id).one()[0]
+        return render_template('event.html', event=event, event_organizer=event_organizer, rsvpExists=rsvpExists, current_user_id = session['user_id'], user=session['user'])
+    else:
+        return redirect(url_for('login'))
 
 app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
 

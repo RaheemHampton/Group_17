@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Event Scheduler App">
+        <title>RSVP</title>
+        <!-- styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    </head>
+
+    <body>
+
+        <header>
+            <div>
+            <a href="/home" class="headtext">Event Planner</a>
+                <a id="upperRight1"> Hello, {{user}}!</a>
+            </div>
+            <a id="upperRight2" href="">Sign Out</a>
+        </header>
+
+        <div class="formwrapper">
+            <h2>{{ event.eventName }}</h2>
+
+            <ul>
+                <li>Date: {{event.dateTime.strftime("%#m/%#d/%Y")}}</li>
+                <li>Time: {{event.dateTime.strftime("%#I:%M%p")}}</li>
+                <li>Location: {{ event.location }}</li>
+                <li>Organizer: {{ event_organizer }}</li>
+                <li>Description: {{ event.description }}</li>
+
+            </ul>
+
+            {% if event.user_id == current_user_id %}
+                <form action="{{ url_for('edit_event', event_id=event.id)}}" method="post">
+                    <input type="submit" value="Edit">
+                </form>
+            {% else %}
+                {% if rsvpExists == False %}
+                    <form action="{{ url_for('rsvp', event_id=event.id) }}" method="post">
+                        <input type="submit" value="RSVP">
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('cancel_rsvp', event_id=event.id) }}" method="post">
+                        <input type="submit" value="Cancel RSVP">
+                    </form>
+                {% endif %}
+            {% endif %}
+            <form action="{{ url_for('home') }}">
+                <input type="submit" value="Home">
+            </form>
+        </div>
+
+    </body>
+</html>
+

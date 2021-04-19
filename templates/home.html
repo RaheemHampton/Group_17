@@ -6,54 +6,52 @@
         <meta name="description" content="Event Scheduler App">
         <title>Events | Event Scheduler</title>
         <!-- styles -->
-        <link href="C:\Users\sails\Group_17\static\homepage.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     </head>
     <body>
-    <!---
-    <nav id="home">
-        <a href="{{ url_for('home') }}"> Home</a>
-    </nav>
-    -->
-    <nav id="greeting">
-        <a style="float: right"> Hello, {{user.name}}!</a>
-    </nav>
-
-    <nav id="signout">
-        <input type="button" value="Sign Out" style="float: right">
-    </nav>
-
-    <h1 id="logo">BOOM</h1>
-
-    <!-- Search Bar -->
-        <form name="search" id="search">
-            <input type="search" id="query" name="q" placeholder="Search for an event...">
-            <button>Search</button>
-        </form>
-    <!-- End of Search Bar -->
-
-    <!-- Create an Event Button  **Connect to Create Event URL**-->
-    <input id="create" href="{{ url_for('createEvent') }}" method="GET" style="float: right" type="button" value="Create Event">
-    <!-- End of Button -->
 
 
-    <!-- Labels/Info of Events -->
-        <table name="labels" id="label">
-            <tr>
-                <th>Event</th>
-                <th>Organizer</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Location</th>
-            </tr>
-            {% for event in events %}
-            <tr>
-                <td><a href="{{ url_for('get_note', note_id=note.id) }}">{{ note.title }}</a></td>
-                <td>{{ note.organizer }}</td>
-                <td>{{ note.date }}</td>
-                <td>{{ note.time }}</td>
-                <td>{{ note.location }}</td>
-            </tr>
+    <header>
+        <div>
+        <a href="/home" class="headtext">Event Planner</a>
+            <a id="upperRight1"> Hello, {{user}}!</a>
+        </div>
+        <a id="upperRight2" href="">Sign Out</a>
+    </header>
+
+
+
+    <br>
+        <div class="formwrapper">
+
+            <form action="{{ url_for('create_event') }}" method="post">
+                  <input type="submit" value="Create event" style="float: top">
+            </form>
+
+            <table>
+                <tr>
+                    <th>Attending</th>
+                    <th>Event</th>
+                    <th>Organizer</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+                </tr>
+                {% for event, user, rsvp in table %}
+                <tr>
+                {% if rsvp.user_id == current_user or event.user_id == current_user %}
+                    <td>*</td>
+                {% else %}
+                    <td> </td>
+                {% endif %}
+                    <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ event.eventName }}</a></td>
+                    <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ user.firstName }}</a></td>
+                    <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                    <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                    <td><a>{{ event.location }}</a></td>
+                </tr>
             {% endfor %}
-        </table>
+            </table>
+        </div>
     </body>
 </html>
