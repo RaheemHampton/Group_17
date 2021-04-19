@@ -219,6 +219,15 @@ def edit_event(event_id):
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
+@app.route('/event/delete/<event_id>', methods=['POST'])
+def delete_note(event_id):
+    #retrieve note from database
+    my_note= db.session.query(Event).filter_by(id=event_id).one()
+    db.session.delete(my_note)
+    db.session.commit()
+
+    return redirect(url_for('home', user = session['user']))
+
 @app.route('/event/<event_id>')
 def view_event(event_id):
     if session.get('user'):
