@@ -6,35 +6,38 @@
         <meta name="description" content="Event Scheduler App">
         <title>Events | Event Scheduler</title>
         <!-- styles -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+        <link href="C:\Users\sails\Group_17\static\homepage.css" rel="stylesheet" type="text/css">
     </head>
     <body>
-
-    <nav>
+    <!---
+    <nav id="home">
         <a href="{{ url_for('home') }}"> Home</a>
+    </nav>
+    -->
+    <nav id="greeting">
         <a style="float: right"> Hello, {{user.name}}!</a>
     </nav>
 
-    <nav>
+    <nav id="signout">
         <input type="button" value="Sign Out" style="float: right">
     </nav>
 
-    <h1> </h1>
+    <h1 id="logo">BOOM</h1>
 
     <!-- Search Bar -->
-        <form name="search">
+        <form name="search" id="search">
             <input type="search" id="query" name="q" placeholder="Search for an event...">
             <button>Search</button>
         </form>
     <!-- End of Search Bar -->
 
     <!-- Create an Event Button  **Connect to Create Event URL**-->
-    <input href="{{ url_for('createEvent') }}" method="GET" style="float: right" type="button" value="Create an Event">
+    <input id="create" href="{{ url_for('createEvent') }}" method="GET" style="float: right" type="button" value="Create Event">
     <!-- End of Button -->
 
 
     <!-- Labels/Info of Events -->
-        <table name="labels">
+        <table name="labels" id="label">
             <tr>
                 <th>Event</th>
                 <th>Organizer</th>
@@ -45,7 +48,10 @@
             {% for event in events %}
             <tr>
                 <td><a href="{{ url_for('get_note', note_id=note.id) }}">{{ note.title }}</a></td>
+                <td>{{ note.organizer }}</td>
                 <td>{{ note.date }}</td>
+                <td>{{ note.time }}</td>
+                <td>{{ note.location }}</td>
             </tr>
             {% endfor %}
         </table>
