@@ -173,8 +173,14 @@ def create_event():
         # user is not in session redirect to login
         return redirect(url_for('login'))
 
-
-
+@app.route('/event/<event_id>', methods=['GET', 'POST'])
+def view_event(event_id):
+    if session.get('user'):
+        #retrieve events from database
+        my_event = db.session.query(Event).filter_by(user_id=session['user_id']).one()
+        return render_template('/event/<event_id>', my_event=my_event )
+    else:
+        return render_template(url_for('login'))
 
 app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
 
