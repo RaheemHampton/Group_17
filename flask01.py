@@ -69,8 +69,9 @@ def register():
         # get entered user data
         first_name = request.form['firstname']
         last_name = request.form['lastname']
+        user_img = "Default.jpg"
         # create user model
-        new_user = User(request.form['email'], first_name, last_name, h_password)
+        new_user = User(request.form['email'], first_name, last_name, h_password, user_img)
         # add user to database and commit
         db.session.add(new_user)
         db.session.commit()
@@ -244,6 +245,26 @@ def view_event(event_id):
         return render_template('event.html', event=event, event_organizer=event_organizer, rsvpExists=rsvpExists, current_user_id = session['user_id'], user=session['user'])
     else:
         return redirect(url_for('login'))
+
+@app.route('/profile', methods=['GET'])
+def view_profile():
+    if session.get('user'):
+
+        user = db.session.query(User).filter_by(id=User.id).one()
+        table1 = db.session.query(Event, User).join(Event, Event.user_id==User.id).outerjoin(RSVP, Event.id == RSVP.event_id and RSVP.user_id == session['user_id']).all()
+        table2 = db.session.query(Event, User, RSVP).join(Event, Event.user_id==User.id).outerjoin(RSVP, Event.id == RSVP.event_id and RSVP.user_id == session['user_id']).all()
+        image = user.image
+        first = user.firstName
+        last = user.lastName
+        email = user.email
+
+
+       
+        return render_template('profile.html', user=session['user'], user_image=image, user_first=first, user_last=last, table1 = table1, table2 = table2, user_email=email)
+
+    else:
+        return redirect(url_for('login'))
+
 
 app.run(host=os.getenv('IP', '127.0.0.1'),port=int(os.getenv('PORT', 5000)),debug=True)
 
