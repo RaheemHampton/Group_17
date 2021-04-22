@@ -77,7 +77,11 @@
     height: 350px;
     text-align: center;
     border: solid black;
+}
+.host2 {
     overflow-y: scroll;
+    margin-top: 0px;
+    border-top: solid black;
 }
 .attend {
     position: fixed;
@@ -86,7 +90,9 @@
     height: 350px;
     text-align: center;
     border: solid black;
-    overflow-y: scroll;
+}
+table {
+    margin-top: 2px;
 }
 th, td {
     border: solid black;

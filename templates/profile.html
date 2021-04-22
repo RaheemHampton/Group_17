@@ -31,28 +31,32 @@
         <a id="email">{{user_email}}</a>
         
         <!--Events Created-->
-        <div class="host" id="style-2">
+        <div class="host">
             <p id="tableHead">Hosting Events</a>
-            <table>
-                <tr>
-                    <th>Event</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Location</th>
-                </tr>
-                {% for event in table %}
-                <tr>
-                    <td><a>{{ event.eventName }}</a></td>
-                    <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
-                    <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
-                    <td><a>{{ event.location }}</a></td>
-                </tr>
-                {% endfor %}
-            </table>
+                <table>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                    </tr>
+                </table>
+            <div class="host2"id="style-2">
+                <table>
+                    {% for event in table %}
+                    <tr>
+                        <td><a>{{ event.eventName }}</a></td>
+                        <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                        <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                        <td><a>{{ event.location }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
 
         <!--Events Attending-->
-        <div class="attend" id="style-2">
+        <div class="attend">
             <p id="tableHead">Attending Events</p>
             <table>
                 <tr>
@@ -62,18 +66,22 @@
                     <th>Time</th>
                     <th>Location</th>
                 </tr>
-                {% for event, user, rsvp in table2 %}
-                {% if rsvp.user_id == current_user or event.user_id == current_user %}
-                <tr>
-                    <td><a>{{ event.eventName }}</a></td>
-                    <td><a>{{ user.firstName }} {{user.lastName}}</a></td>
-                    <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
-                    <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
-                    <td><a>{{ event.location }}</a></td>
-                </tr>
-                {% endif %}
-                {% endfor %}
             </table>
+            <div class="host2"id="style-2">
+                <table>
+                    {% for event, user, rsvp in table2 %}
+                    {% if rsvp.user_id == current_user or event.user_id == current_user %}
+                    <tr>
+                        <td><a>{{ event.eventName }}</a></td>
+                        <td><a>{{ user.firstName }} {{user.lastName}}</a></td>
+                        <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                        <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                        <td><a>{{ event.location }}</a></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
         </div>
 
         <!--Events Attending-->
