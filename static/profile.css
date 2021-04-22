@@ -17,6 +17,16 @@
     margin-bottom: 0px;
     padding-bottom: 0px;
 }
+#upperRight2{
+    font-size: 15px;
+    float: right;
+    text-decoration: none;
+    color: black;
+    font-family: verdana;
+    margin-right: 40px;
+    padding-top: 0px;
+    margin-top: 0px;
+}
 .imageCon {
     position: fixed;
     top: 130px;

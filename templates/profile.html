@@ -10,9 +10,10 @@
     </head>
     <body>
         <header>
-            <div>
             <a href="/home" class="headtext">Event Planner</a>
-                <a id="upperRight1"> Hello, {{user}}!</a>
+            <div id="upperRight1">
+                <a> Hello, {{user}}!   </a>
+                <a href="{{ url_for('signout') }}">Sign Out</a>
             </div>
         </header>
 
@@ -36,7 +37,7 @@
                     <th>Time</th>
                     <th>Location</th>
                 </tr>
-                {% for event, user in table1 %}
+                {% for event in table %}
                 <tr>
                     <td><a>{{ event.eventName }}</a></td>
                     <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
@@ -53,22 +54,27 @@
             <table>
                 <tr>
                     <th>Event</th>
+                    <th>Host</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Location</th>
                 </tr>
                 {% for event, user, rsvp in table2 %}
-                {% if rsvp != None %}
+                {% if rsvp.user_id == current_user or event.user_id == current_user and %}
                 <tr>
-                    <td><a>{{ rsvp.event.eventName }}</a></td>
-                    <td><a> {{ rsvp.event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
-                    <td><a>{{ rsvp.event.dateTime.strftime("%#I:%M%p") }}</a></td>
-                    <td><a>{{ rsvp.event.location }}</a></td>
+                    <td><a>{{ event.eventName }}</a></td>
+                    <td><a>{{ event.eventName }}</a></td>
+                    <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                    <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                    <td><a>{{ event.location }}</a></td>
                 </tr>
                 {% endif %}
                 {% endfor %}
             </table>
         </div>
+
+        <!--Events Attending-->
+        
 
     </body>
 </html>

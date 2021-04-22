@@ -13,10 +13,13 @@
 
     <header>
         <div>
-        <a href="/home" class="headtext">Event Planner</a>
             <a id="upperRight1"> Hello, {{user}}!</a>
+            <a href="/home" class="headtext">Event Planner</a>
         </div>
-        <a id="upperRight2" href="">Sign Out</a>
+        <nav>
+            <a href="{{ url_for('signout') }}" id="upperRight2">Sign Out</a>
+            <a href="{{ url_for('view_profile') }}"> Profile</a>
+        </nav>
     </header>
 
 
@@ -27,7 +30,7 @@
             <form action="{{ url_for('create_event') }}" method="post">
                   <input type="submit" value="Create event" style="float: top">
             </form>
-            <a href="{{ url_for('view_profile') }}"> Profile</a>
+            
             <table>
                 <tr>
                     <th>Attending</th>
