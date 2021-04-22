@@ -27,13 +27,18 @@
     padding-top: 0px;
     margin-top: 0px;
 }
+#helloUser {    
+    margin-right: 20px;
+}
 .imageCon {
     position: fixed;
     top: 130px;
     left: 10px;
     height: 350px;
+    width:250px;
     overflow: hidden;
     border: solid;
+    text-align: center;
 }
 .image {
     border-radius: 50%;
@@ -64,20 +69,49 @@
 }
 .host{
     position: fixed;
-    top: 250px;
+    top: 130px;
     left: 350px;
+    height: 350px;
     text-align: center;
+    border: solid black;
+    overflow-y: scroll;
 }
-
-
 .attend {
     position: fixed;
-    top: 250px;
+    top: 130px;
     left: 900px;
+    height: 350px;
     text-align: center;
+    border: solid black;
+    overflow-y: scroll;
+}
+th, td {
+    border: solid black;
+    width: 100px;
+}
+#tableHead {
+    font-size: 20px;
+    font-weight: bold;
 }
 
-table, th, td {
-    border: solid black;
-    width: 500px;
+#style-2::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
 }
+
+#style-2::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #F5F5F5;
+}
+
+#style-2::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #D62929;
+}
+
+
