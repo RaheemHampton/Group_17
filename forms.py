@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField
-from wtforms.validators import Length, Regexp, DataRequired, EqualTo, Email
-from wtforms import ValidationError
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField
+from wtforms.validators import Length, Regexp, DataRequired, EqualTo, Email, Optional
+from flask_wtf.file import FileAllowed
+from wtforms import ValidationError, FileField
 from models import User
 from database import db
 
@@ -60,3 +61,33 @@ class LoginForm(FlaskForm):
     def validate_email(self, field):
         if db.session.query(User).filter_by(email=field.data).count() == 0:
             raise ValidationError('Incorrect username or password.')
+
+class EditProForm(FlaskForm):
+    class Meta:
+        
+        csrf = False
+
+    firstname = StringField(render_kw={"placeholder": "First Name"}, validators=[Optional(), Length(1, 10)])
+
+    lastname = StringField(render_kw={"placeholder": "Last Name"}, validators=[Optional(), Length(1, 10)])
+
+    email = StringField(render_kw={"placeholder": "Email"}, validators=[
+            Optional(), Email(message='Not a valid email address.')])
+
+    image = FileField('Upload Image', validators=[
+            Optional(), FileAllowed(['jpg', 'png'], 'Images only!')])
+
+    password = PasswordField(render_kw={"placeholder": "Password"}, validators=[
+        Optional(), EqualTo('confirmPassword', message='Passwords must match')])
+
+    confirmPassword = PasswordField(render_kw={"placeholder": "Confirm Password"}, validators=[
+        Optional(), Length(min=6, max=10)])
+
+    submit = SubmitField('Submit')
+
+    def validate_email(self, field):
+        if db.session.query(User).filter_by(email=field.data).count() != 0:
+            raise ValidationError('Email already in use.')
+        
+
+

@@ -1,0 +1,61 @@
+.headtext{
+    border: 1px black dotted;
+    padding: 10px;
+    border-left: 0px;
+    border-top: 0px;
+    display: inline;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 50px;
+    font-family: verdana;
+    color: black;
+    font-weight: bold;
+}
+#upperRight1{
+    font-size: 20px;
+    float: right;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+#upperRight2{
+    font-size: 15px;
+    float: right;
+    text-decoration: none;
+    color: black;
+    font-family: verdana;
+    margin-right: 40px;
+    padding-top: 0px;
+    margin-top: 0px;
+}
+#helloUser {    
+    margin-right: 20px;
+    text-decoration: none;
+}
+
+#formHeader {
+    position: fixed;
+    left: 43%;
+    top: 18%;
+    font-size: 30px;
+}
+.formCover {
+    position: fixed;
+    left: 40%;
+    top: 30%;
+    border: solid black;
+    padding-top: 25px;
+    padding-bottom: 0px;;
+    padding-left: 0px;
+    padding-right: 0px;
+    text-align: center;
+}
+.inputField {
+    margin-bottom: 11px;
+}
+#imageField {
+    margin-bottom: 50px;
+    margin-left: 88px;
+}
+#submitField {
+    margin-bottom: 15px;
+}

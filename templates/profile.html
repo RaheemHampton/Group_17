@@ -12,23 +12,23 @@
         <header>
             <a href="/home" class="headtext">Event Planner</a>
             <div id="upperRight1">
-                <a id="helloUser"> Hello, {{user}}!</a>
+                <a href="{{ url_for('view_profile') }}"id="helloUser"> Hello, {{user}}!</a>
                 <a href="{{ url_for('signout') }}">Sign Out</a>
             </div>
         </header>
 
         <!--Image, Image Upload-->
         <div class="imageCon">
-            <img src="{{ url_for('static', filename= user_image) }}" alt="Default profile picture" class="image" method="post">
+            <img src="{{ url_for('static', filename= 'images/' + user_image) }}" alt="Default profile picture" class="image" method="post">
             <p id="tableHead">{{user}}'s Profile</p>
-            <form action="" id="editProfBut">
+            <form action="{{ url_for('edit_profile') }}" id="editProfBut">
                 <input type="submit" value="Edit Profile" class="myButton" />
             </form>
         </div>
 
         <!--User Name, User Email, Edit Event Button-->
-        <a id="name">{{user_first}} {{user_last}}</a>
-        <a id="email">{{user_email}}</a>
+        <a id="name"><b><u>Name</u>:</b> {{user_first}} {{user_last}}</a>
+        <a id="email"><b><u>Email</u>:</b> {{user_email}}</a>
         
         <!--Events Created-->
         <div class="host">

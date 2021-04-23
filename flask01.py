@@ -11,10 +11,12 @@ from models import RSVP as RSVP
 from models import Event as Event
 from flask import session
 from flask import flash
-from forms import CreateEventForm, RegisterForm, LoginForm
+from forms import CreateEventForm, RegisterForm, LoginForm, EditProForm
+from flask_uploads import configure_uploads, IMAGES, UploadSet
+from werkzeug.utils import secure_filename
 from datetime import datetime
 import bcrypt
-import re
+import os
 
 
 app = Flask(__name__)     # create an app
@@ -181,7 +183,7 @@ def edit_event(event_id):
         date_error = False
         time_error = False
 
-        if request.method == 'POST' and form.validate_on_submit():
+        if  form.validate_on_submit():
             event_name = request.form['eventname']
 
             date = request.form['event_date']
@@ -268,6 +270,54 @@ def view_profile():
         return render_template('profile.html', user=session['user'], current_user=session['user_id'],  user_first=first, user_last=last, user_email=email, 
         user_image=image, table=table, table2=table2)
 
+    else:
+        return redirect(url_for('login'))
+
+app.config['UPLOADED_IMAGES_DEST'] = "static/images"
+images = UploadSet('images', IMAGES)
+configure_uploads(app, images)
+
+@app.route('/edit-profile', methods=['GET', 'POST'])
+def edit_profile():
+
+    if session.get('user'):
+        
+        form = EditProForm()
+
+        if form.validate_on_submit():
+
+
+            user = db.session.query(User).filter_by(id = session['user_id']).one()
+
+            firstname = request.form['firstname']
+            if firstname != "":
+                user.firstName = firstname
+                db.session.commit()
+            
+            lastname = request.form['lastname']
+            if lastname != "":
+                user.lastName = lastname
+                db.session.commit()
+            
+            email = request.form['email']
+            if email != "":
+                user.email = email
+                db.session.commit()
+            
+            if form.image.data != "":
+                filename = images.save(form.image.data)
+                user.image = filename
+                db.session.commit()
+
+            password = bcrypt.hashpw(
+            request.form['password'].encode('utf-8'), bcrypt.gensalt())
+            if  request.form['password'] != "":
+                user.password = password
+                db.session.commit()
+
+            return redirect(url_for('signout'))
+        else:
+            return render_template('edit-profile.html', form=form)
     else:
         return redirect(url_for('login'))
 
