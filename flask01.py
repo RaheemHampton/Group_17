@@ -303,8 +303,9 @@ def edit_profile():
             if email != "":
                 user.email = email
                 db.session.commit()
-            
-            if form.image.data != "":
+
+
+            if form.image.data.filename != '':
                 filename = images.save(form.image.data)
                 user.image = filename
                 db.session.commit()
