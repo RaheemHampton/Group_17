@@ -187,53 +187,57 @@ def create_event():
 @app.route('/event/<event_id>/edit', methods=['GET', 'POST'])
 def edit_event(event_id):
     if session.get('user'):
-        form = CreateEventForm()
-        date_error = False
-        time_error = False
+        user_id = db.session.query(Event.user_id).filter_by(id=event_id).one()[0]
+        if user_id == session['user_id']:
+            form = CreateEventForm()
+            date_error = False
+            time_error = False
 
-        if  form.validate_on_submit():
-            event_name = request.form['eventname']
+            if  form.validate_on_submit():
+                event_name = request.form['eventname']
 
-            date = request.form['event_date']
-            if date == '': #throw error if date field is empty
-                date_error = ('Please enter a date')
+                date = request.form['event_date']
+                if date == '': #throw error if date field is empty
+                    date_error = ('Please enter a date')
 
-            time = request.form['event_time']
-            if time == '': #throw error if time field is empty
-                time_error = 'Please enter a time'
+                time = request.form['event_time']
+                if time == '': #throw error if time field is empty
+                    time_error = 'Please enter a time'
 
-            location = request.form['location']
+                location = request.form['location']
 
-            description = request.form['description']
+                description = request.form['description']
 
-            # If no date/time errors, create datetime object & commit all to database
-            updated_event = db.session.query(Event).get(event_id)
-            if (date_error == False) and (time_error == False):
-                # combine date and time fields to create dateTime object
-                date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
+                # If no date/time errors, create datetime object & commit all to database
+                updated_event = db.session.query(Event).get(event_id)
+                if (date_error == False) and (time_error == False):
+                    # combine date and time fields to create dateTime object
+                    date_time = datetime.strptime(date + ' ' + time, '%Y-%m-%d %H:%M')
 
-                #storing edited event info (including edited created datetime object) in database
-                updated_event.eventName = event_name
-                updated_event.dateTime = date_time
-                updated_event.location = location
-                updated_event.description = description
-                db.session.add(updated_event)
-                db.session.commit()
-                return redirect(url_for('home', user=session['user']))
+                    #storing edited event info (including edited created datetime object) in database
+                    updated_event.eventName = event_name
+                    updated_event.dateTime = date_time
+                    updated_event.location = location
+                    updated_event.description = description
+                    db.session.add(updated_event)
+                    db.session.commit()
+                    return redirect(url_for('home', user=session['user']))
+                else:
+                    return render_template('create-event.html', form=form, event=updated_event, time_error=time_error, date_error=date_error, user=session['user'])
+
             else:
-                return render_template('create-event.html', form=form, event=updated_event, time_error=time_error, date_error=date_error, user=session['user'])
+                #Get request - show new note form to edit note
+                #retreive event from database
+                my_event = db.session.query(Event).filter_by(id=event_id).one()
+                form.eventname.data = my_event.eventName
+                form.location.data = my_event.location
+                form.description.data = my_event.description
+                date = my_event.dateTime.strftime('%Y-%m-%d')
+                time = my_event.dateTime.strftime('%H:%M')
 
+                return render_template('create-event.html', form=form, event=my_event, time=str(time), date=str(date), time_error=time_error, date_error=date_error, user=session['user'])
         else:
-            #Get request - show new note form to edit note
-            #retreive event from database
-            my_event = db.session.query(Event).filter_by(id=event_id).one()
-            form.eventname.data = my_event.eventName
-            form.location.data = my_event.location
-            form.description.data = my_event.description
-            date = my_event.dateTime.strftime('%Y-%m-%d')
-            time = my_event.dateTime.strftime('%H:%M')
-
-            return render_template('create-event.html', form=form, event=my_event, time=str(time), date=str(date), time_error=time_error, date_error=date_error, user=session['user'])
+            return redirect(url_for('view_event', event_id=event_id))
     else:
         # user is not in session redirect to login
         return redirect(url_for('login'))
