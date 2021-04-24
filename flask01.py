@@ -68,6 +68,10 @@ def signout():
 
     return redirect(url_for('login'))
 
+app.config['UPLOADED_IMAGES_DEST'] = "static/images"
+images = UploadSet('images', IMAGES)
+configure_uploads(app, images)
+
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     form = RegisterForm()
@@ -79,7 +83,11 @@ def register():
         # get entered user data
         first_name = request.form['firstname']
         last_name = request.form['lastname']
-        user_img = "Default.jpg"
+
+        if form.image.data.filename != '':
+            user_img = images.save(form.image.data)
+        else:
+            user_img='Default.jpg'
         # create user model
         new_user = User(request.form['email'], first_name, last_name, h_password, user_img)
         # add user to database and commit
@@ -256,7 +264,7 @@ def view_event(event_id):
     else:
         return redirect(url_for('login'))
 
-@app.route('/profile')
+@app.route('/profile/')
 def view_profile():
     if session.get('user'):
 
@@ -306,6 +314,7 @@ def edit_profile():
 
 
             if form.image.data.filename != '':
+                print(type(form.image.data))
                 filename = images.save(form.image.data)
                 user.image = filename
                 db.session.commit()

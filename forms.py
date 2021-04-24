@@ -38,6 +38,10 @@ class RegisterForm(FlaskForm):
     confirmPassword = PasswordField('Confirm Password', validators=[
         Length(min=6, max=10)
     ])
+
+    image = FileField('Upload Image', validators=[
+        Optional(), FileAllowed(['jpg', 'png'], 'Images only!')])
+
     submit = SubmitField('Submit')
 
     def validate_email(self, field):
