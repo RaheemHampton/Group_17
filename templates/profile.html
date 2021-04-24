@@ -12,7 +12,7 @@
         <header>
             <a href="/home" class="headtext">Event Planner</a>
             <div id="upperRight1">
-                <a href="{{ url_for('view_profile') }}"id="helloUser"> Hello, {{user}}!</a>
+                <a href="{{ url_for('view_profile', user_id=current_user) }}"id="helloUser"> Hello, {{user}}!</a>
                 <a href="{{ url_for('signout') }}">Sign Out</a>
             </div>
         </header>
