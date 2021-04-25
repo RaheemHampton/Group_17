@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField
 from wtforms.validators import Length, Regexp, DataRequired, EqualTo, Email, Optional
 from flask_wtf.file import FileAllowed
-from wtforms import ValidationError, FileField
+from wtforms import ValidationError, FileField, HiddenField
 from models import User
 from database import db
 
@@ -68,30 +68,40 @@ class LoginForm(FlaskForm):
 
 class EditProForm(FlaskForm):
     class Meta:
-        
         csrf = False
 
-    firstname = StringField(render_kw={"placeholder": "First Name"}, validators=[Optional(), Length(1, 10)])
+    firstname = StringField('First Name', validators=[Length(1, 10)])
 
-    lastname = StringField(render_kw={"placeholder": "Last Name"}, validators=[Optional(), Length(1, 10)])
+    lastname = StringField('Last Name', validators=[Length(1, 20)])
 
-    email = StringField(render_kw={"placeholder": "Email"}, validators=[
-            Optional(), Email(message='Not a valid email address.')])
+    user_id = HiddenField()
+
+    email = StringField('Email', [
+        Email(message='Not a valid email address.'),
+        DataRequired()])
+
+    password = PasswordField('Password', [
+        DataRequired(message="Please enter a password."),
+        EqualTo('confirmPassword', message='Passwords must match')
+    ])
+
+    confirmPassword = PasswordField('Confirm Password', validators=[
+        Length(min=6, max=10)
+    ])
 
     image = FileField('Upload Image', validators=[
-            Optional(), FileAllowed(['jpg', 'png'], 'Images only!')])
-
-    password = PasswordField(render_kw={"placeholder": "Password"}, validators=[
-        Optional(), EqualTo('confirmPassword', message='Passwords must match')])
-
-    confirmPassword = PasswordField(render_kw={"placeholder": "Confirm Password"}, validators=[
-        Optional(), Length(min=6, max=10)])
+        Optional(), FileAllowed(['jpg', 'png'], 'Images only!')])
 
     submit = SubmitField('Submit')
 
-    def validate_email(self, field):
-        if db.session.query(User).filter_by(email=field.data).count() != 0:
-            raise ValidationError('Email already in use.')
+    def validate(self):
+        print('User id: ', self.user_id.data)
+        print(self.email.data)
+        if db.session.query(User).filter_by(email=self.email.data).count() != 0 and db.session.query(User.email).filter_by(id=self.user_id.data).one()[0] != self.email.data:
+            error_list = list(self.email.errors)
+            error_list.append('Email already in use')
+            self.email.errors = tuple(error_list)
+            #raise ValidationError('Email already in use.')
         
 
 

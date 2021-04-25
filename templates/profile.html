@@ -21,7 +21,7 @@
         <div class="imageCon">
             <img src="{{ url_for('static', filename= 'images/' + user_image) }}" alt="Default profile picture" class="image" method="post">
             <p id="tableHead">{{user}}'s Profile</p>
-            <form action="{{ url_for('edit_profile') }}" id="editProfBut">
+            <form action="{{ url_for('edit_profile', user_id=current_user) }}" id="editProfBut">
                 <input type="submit" value="Edit Profile" class="myButton" />
             </form>
         </div>

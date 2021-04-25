@@ -10,8 +10,13 @@
     </head>
     <body>
         <div class="formwrapper">
+        {% if profile %}
+            <h2 class="title">Edit profile</h2>
+            <form method="POST" action="{{ url_for('edit_profile', user_id=profile.id) }}" enctype="multipart/form-data">
+        {% else %}
             <h2 class="title">Register</h2>
             <form method="POST" action="/register" enctype="multipart/form-data">
+        {% endif %}
                 <div class="form-field">{{ form.firstname.label }} {{ form.firstname }}
                     {% if form.firstname.errors %}
                     <ul class="errors">
@@ -30,6 +35,9 @@
                     </ul>
                     {% endif %}
                 </div>
+            {% if profile %}
+                <input type="hidden" name="user_id" value={{profile.id}}>
+            {% endif %}
                 <div class="form-field">{{ form.email.label }} {{ form.email }}
                     {% if form.email.errors %}
                     <ul class="errors">

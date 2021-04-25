@@ -97,7 +97,7 @@ def register():
         session['user'] = first_name
         session['user_id'] = new_user.id  # access id value from user model of this newly added user
         # show user dashboard view
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     else:
         # something went wrong - display register view
         return render_template('register.html', form=form)
@@ -244,7 +244,6 @@ def edit_event(event_id):
 
 @app.route('/event/<event_id>/delete', methods=['POST'])
 def delete_event(event_id):
-    print('user not got')
     if session.get('user'):
         print('user got')
         #retrieve note from database
@@ -289,49 +288,49 @@ app.config['UPLOADED_IMAGES_DEST'] = "static/images"
 images = UploadSet('images', IMAGES)
 configure_uploads(app, images)
 
-@app.route('/edit-profile', methods=['GET', 'POST'])
-def edit_profile():
-
+@app.route('/profile/<user_id>/edit', methods=['GET', 'POST'])
+def edit_profile(user_id):
     if session.get('user'):
-        
-        form = EditProForm()
+        if int(user_id) == int(session['user_id']):
+            form = EditProForm()
+            if form.validate_on_submit():
+                print('hello')
+                updated_profile = db.session.query(User).get(user_id)
+                # salt and hash password
+                h_password = bcrypt.hashpw(
+                    request.form['password'].encode('utf-8'), bcrypt.gensalt())
+                updated_profile.password = h_password
 
-        if form.validate_on_submit():
+                # get entered user data
+                first_name = request.form['firstname']
+                updated_profile.firstName = first_name
 
+                last_name = request.form['lastname']
+                updated_profile.lastName = last_name
 
-            user = db.session.query(User).filter_by(id = session['user_id']).one()
+                email = request.form['email']
+                updated_profile.email = email
 
-            firstname = request.form['firstname']
-            if firstname != "":
-                user.firstName = firstname
-                db.session.commit()
-            
-            lastname = request.form['lastname']
-            if lastname != "":
-                user.lastName = lastname
-                db.session.commit()
-            
-            email = request.form['email']
-            if email != "":
-                user.email = email
-                db.session.commit()
+                if form.image.data.filename != '':
+                    user_img = images.save(form.image.data)
+                    updated_profile.image = user_img
 
-
-            if form.image.data.filename != '':
-                print(type(form.image.data))
-                filename = images.save(form.image.data)
-                user.image = filename
+                db.session.add(updated_profile)
                 db.session.commit()
 
-            password = bcrypt.hashpw(
-            request.form['password'].encode('utf-8'), bcrypt.gensalt())
-            if  request.form['password'] != "":
-                user.password = password
-                db.session.commit()
+                return redirect(url_for('view_profile', user_id=user_id))
 
-            return redirect(url_for('signout'))
+            else:
+                print('Had to go to edit profile again!')
+                # Get request - show new register form to edit profile
+                # retreive event from database
+                my_profile = db.session.query(User).filter_by(id=user_id).one()
+                form.firstname.data = my_profile.firstName
+                form.lastname.data = my_profile.lastName
+                form.email.data = my_profile.email
+                return render_template('register.html', form=form, profile=my_profile)
         else:
-            return render_template('edit-profile.html', form=form)
+            return redirect(url_for('view_profile', user_id=user_id))
     else:
         return redirect(url_for('login'))
 
