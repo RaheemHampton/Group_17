@@ -271,6 +271,7 @@ def view_profile(user_id):
     if session.get('user'):
 
         user = db.session.query(User).filter_by(id = user_id).one()
+        user_id = user.id
         first = user.firstName
         last = user.lastName
         email = user.email
@@ -278,7 +279,7 @@ def view_profile(user_id):
         table = db.session.query(Event).filter_by(user_id=user_id)
         table2 = db.session.query(Event, User, RSVP).join(Event, Event.user_id==User.id).outerjoin(RSVP, Event.id == RSVP.event_id and RSVP.user_id == session['user_id'])
         return render_template('profile.html', user=session['user'], current_user=session['user_id'],  user_first=first, user_last=last, user_email=email, 
-        user_image=image, table=table, table2=table2)
+        user_image=image, table=table, table2=table2, user_id=user_id)
 
     else:
         return redirect(url_for('login'))

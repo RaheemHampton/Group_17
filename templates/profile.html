@@ -21,9 +21,11 @@
         <div class="imageCon">
             <img src="{{ url_for('static', filename= 'images/' + user_image) }}" alt="Default profile picture" class="image" method="post">
             <p id="tableHead">{{user_first}}'s Profile</p>
-            <form action="{{ url_for('edit_profile', user_id=current_user) }}" id="editProfBut">
+            {% if user_id == current_user %}
+            <form action="{{ url_for('edit_profile', user_id=user_id) }}" id="editProfBut">
                 <input type="submit" value="Edit Profile" class="myButton" />
             </form>
+            {% endif %}
         </div>
 
         <!--User Name, User Email, Edit Event Button-->
@@ -70,7 +72,7 @@
             <div class="host2"id="style-2">
                 <table>
                     {% for event, user, rsvp in table2 %}
-                    {% if rsvp.user_id == current_user or event.user_id == current_user %}
+                    {% if rsvp.user_id == user_id or event.user_id == user_id %}
                     <tr>
                         <td><a>{{ event.eventName }}</a></td>
                         <td><a>{{ user.firstName }} {{user.lastName}}</a></td>
