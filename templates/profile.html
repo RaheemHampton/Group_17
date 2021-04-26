@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Event Scheduler App">
+        <title>Events | Event Scheduler</title>
+        <!-- styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+    </head>
+    <body>
+        <header>
+            <a href="/" class="headtext">Event Planner</a>
+            <div id="upperRight1">
+                <a href="{{ url_for('signout') }}">Sign Out</a><a>&nbsp;&nbsp;&nbsp;</a>
+                <a>Hello,&nbsp;</a><a href="{{ url_for('view_profile', user_id=current_user) }}">{{user}}</a><a>!</a>
+            </div>
+        </header>
+
+        <!--Image, Image Upload-->
+        <div class="imageCon">
+            <img src="{{ url_for('static', filename= 'images/' + user_image) }}" alt="Default profile picture" class="image" method="post">
+            <p id="tableHead">{{user_first}}'s Profile</p>
+            {% if user_id == current_user %}
+            <form action="{{ url_for('edit_profile', user_id=user_id) }}" id="editProfBut">
+                <input type="submit" value="Edit Profile" class="myButton" />
+            </form>
+            {% endif %}
+        </div>
+
+        <!--User Name, User Email, Edit Event Button-->
+        <a id="name"><b><u>Name</u>:</b> {{user_first}} {{user_last}}</a>
+        <a id="email"><b><u>Email</u>:</b> {{user_email}}</a>
+        
+        <!--Events Created-->
+        <div class="host">
+            <p id="tableHead">Hosting Events</a>
+                <table>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                    </tr>
+                </table>
+            <div class="host2"id="style-2">
+                <table>
+                    {% for event in table %}
+                    <tr>
+                        <td><a>{{ event.eventName }}</a></td>
+                        <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                        <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                        <td><a>{{ event.location }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <!--Events Attending-->
+        <div class="attend">
+            <p id="tableHead">Attending Events</p>
+            <table>
+                <tr>
+                    <th>Event</th>
+                    <th>Host</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+                </tr>
+            </table>
+            <div class="host2"id="style-2">
+                <table>
+                    {% for event, user, rsvp in table2 %}
+                    {% if rsvp.user_id == user_id or event.user_id == user_id %}
+                    <tr>
+                        <td><a>{{ event.eventName }}</a></td>
+                        <td><a>{{ user.firstName }} {{user.lastName}}</a></td>
+                        <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
+                        <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
+                        <td><a>{{ event.location }}</a></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <!--Events Attending-->
+        
+
+    </body>
+</html>

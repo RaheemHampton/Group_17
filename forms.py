@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField
-from wtforms.validators import Length, Regexp, DataRequired, EqualTo, Email
-from wtforms import ValidationError
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField
+from wtforms.validators import Length, Regexp, DataRequired, EqualTo, Email, Optional
+from flask_wtf.file import FileAllowed
+from wtforms import ValidationError, FileField, HiddenField
 from models import User
 from database import db
 
@@ -37,6 +38,10 @@ class RegisterForm(FlaskForm):
     confirmPassword = PasswordField('Confirm Password', validators=[
         Length(min=6, max=10)
     ])
+
+    image = FileField('Upload Image', validators=[
+        Optional(), FileAllowed(['jpg', 'png'], 'Images only!')])
+
     submit = SubmitField('Submit')
 
     def validate_email(self, field):
@@ -60,3 +65,29 @@ class LoginForm(FlaskForm):
     def validate_email(self, field):
         if db.session.query(User).filter_by(email=field.data).count() == 0:
             raise ValidationError('Incorrect username or password.')
+
+class EditProForm(FlaskForm):
+    class Meta:
+        csrf = False
+
+    firstname = StringField('First Name', validators=[Length(1, 10)])
+
+    lastname = StringField('Last Name', validators=[Length(1, 20)])
+
+    password = PasswordField('Password', [
+        DataRequired(message="Please enter a password."),
+        EqualTo('confirmPassword', message='Passwords must match')
+    ])
+
+    confirmPassword = PasswordField('Confirm Password', validators=[
+        Length(min=6, max=10)
+    ])
+
+    image = FileField('Upload Image', validators=[
+        Optional(), FileAllowed(['jpg', 'png'], 'Images only!')])
+
+    submit = SubmitField('Submit')
+
+
+
+

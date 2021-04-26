@@ -28,16 +28,18 @@ class User(db.Model):
     firstName = db.Column(db.String(200))
     lastName = db.Column(db.String(200))
     password = db.Column(db.String(255), nullable=False)
+    image = db.Column(db.String(200))
 
     #relations: 1 user -> many events, 1 user -> many rsvps
     events = db.relationship("Event", backref="User", lazy=True)
     rsvps = db.relationship("RSVP", backref="User", lazy=True)
 
-    def __init__(self, email, firstName, lastName, password):
+    def __init__(self, email, firstName, lastName, password, image):
         self.email = email
         self.firstName = firstName
         self.lastName = lastName
         self.password = password
+        self.image = image
 
     def pwdCheck(self, password):
         if self.password == password:

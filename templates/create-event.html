@@ -12,10 +12,12 @@
 
     <header>
         <div>
-        <a href="/home" class="headtext">Event Planner</a>
-            <a id="upperRight1"> Hello, {{user}}!</a>
+            <a id="upperRight1">!</a><a id="upperRight1" href="{{ url_for('view_profile', user_id=current_user) }}">{{user}}</a><a id="upperRight1">Hello,&nbsp;</a>
+            <a href="/" class="headtext">Event Planner</a>
         </div>
-        <a id="upperRight2" href="">Sign Out</a>
+        <nav>
+            <a href="{{ url_for('signout') }}" id="upperRight2">Sign Out</a>
+        </nav>
     </header>
 
     <div class="formwrapper">
