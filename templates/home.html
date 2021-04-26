@@ -13,12 +13,11 @@
 
     <header>
         <div>
-            <a id="upperRight1"> Hello, {{user}}!</a>
-            <a href="/home" class="headtext">Event Planner</a>
+            <a id="upperRight1">!</a><a id="upperRight1" href="{{ url_for('view_profile', user_id=current_user) }}">{{user}}</a><a id="upperRight1">Hello,&nbsp;</a>
+            <a href="/" class="headtext">Event Planner</a>
         </div>
         <nav>
             <a href="{{ url_for('signout') }}" id="upperRight2">Sign Out</a>
-            <a href="{{ url_for('view_profile', user_id=current_user) }}"> Profile</a>
         </nav>
     </header>
 
@@ -48,7 +47,7 @@
                     <td> </td>
                 {% endif %}
                     <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ event.eventName }}</a></td>
-                    <td><a href="{{url_for('view_event', event_id=event.id)}}">{{ user.firstName }}</a></td>
+                    <td><a href="{{url_for('view_profile', user_id=user.id)}}">{{ user.firstName }}</a></td>
                     <td><a> {{ event.dateTime.strftime("%#m/%#d/%Y") }}</a></td>
                     <td><a>{{ event.dateTime.strftime("%#I:%M%p") }}</a></td>
                     <td><a>{{ event.location }}</a></td>

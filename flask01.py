@@ -37,7 +37,7 @@ with app.app_context():
 # @app.route is a decorator. It gives the function "index" special powers.
 # In this case it makes it so anyone going to "your-url/" makes this function
 # get called. What it returns is what is shown as the web page
-@app.route('/')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
@@ -105,7 +105,7 @@ def register():
 
 
 # TODO
-@app.route('/home')
+@app.route('/')
 def home():
     # check if a user is saved in session
     if session.get('user'):
