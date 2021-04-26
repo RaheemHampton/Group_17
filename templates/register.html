@@ -35,9 +35,17 @@
                     </ul>
                     {% endif %}
                 </div>
-            {% if profile %}
-                <input type="hidden" name="user_id" value={{profile.id}}>
-            {% endif %}
+                {% if profile %}
+                <div class="form-field"><label>Email </label> <input type="text" name="email" value="{{profile.email}}"/>
+                    {% if email_errors %}
+                    <ul class="errors">
+                        {% for error in email_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% else %}
                 <div class="form-field">{{ form.email.label }} {{ form.email }}
                     {% if form.email.errors %}
                     <ul class="errors">
@@ -47,6 +55,7 @@
                     </ul>
                     {% endif %}
                 </div>
+                {% endif %}
                 <div class="form-field">{{ form.password.label }} {{ form.password }}
                     {% if form.password.errors %}
                     <ul class="errors">

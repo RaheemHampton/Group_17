@@ -74,12 +74,6 @@ class EditProForm(FlaskForm):
 
     lastname = StringField('Last Name', validators=[Length(1, 20)])
 
-    user_id = HiddenField()
-
-    email = StringField('Email', [
-        Email(message='Not a valid email address.'),
-        DataRequired()])
-
     password = PasswordField('Password', [
         DataRequired(message="Please enter a password."),
         EqualTo('confirmPassword', message='Passwords must match')
@@ -94,14 +88,6 @@ class EditProForm(FlaskForm):
 
     submit = SubmitField('Submit')
 
-    def validate(self):
-        print('User id: ', self.user_id.data)
-        print(self.email.data)
-        if db.session.query(User).filter_by(email=self.email.data).count() != 0 and db.session.query(User.email).filter_by(id=self.user_id.data).one()[0] != self.email.data:
-            error_list = list(self.email.errors)
-            error_list.append('Email already in use')
-            self.email.errors = tuple(error_list)
-            #raise ValidationError('Email already in use.')
-        
+
 
 

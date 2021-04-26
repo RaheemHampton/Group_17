@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 import bcrypt
 import os
+import re
 
 
 app = Flask(__name__)     # create an app
@@ -245,10 +246,8 @@ def edit_event(event_id):
 @app.route('/event/<event_id>/delete', methods=['POST'])
 def delete_event(event_id):
     if session.get('user'):
-        print('user got')
         #retrieve note from database
         my_event= db.session.query(Event).filter_by(id=event_id).one()
-        print('Event ID: ', my_event.id)
         db.session.delete(my_event)
         db.session.commit()
         return redirect(url_for('home'))
@@ -292,9 +291,29 @@ configure_uploads(app, images)
 def edit_profile(user_id):
     if session.get('user'):
         if int(user_id) == int(session['user_id']):
-            form = EditProForm()
+            form = EditProForm(user_id=user_id)
             if form.validate_on_submit():
-                print('hello')
+
+                email_errors = []
+                in_email = request.form['email']
+                email_in_use = (db.session.query(User).filter_by(email=in_email).count() != 0) == True and (db.session.query(User.email).filter_by(id=user_id).one()[0] == in_email) == False
+                email_correct = re.search('^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$', in_email) is not None
+
+                if email_correct == False:
+                    email_errors.append('Please enter a valid email')
+                    my_profile = db.session.query(User).filter_by(id=user_id).one()
+                    form.firstname.data = my_profile.firstName
+                    form.lastname.data = my_profile.lastName
+                    return render_template('register.html', form=form, profile=my_profile, email_errors=email_errors)
+
+                if email_in_use == True:
+                    email_errors.append('Email is already in use')
+                    my_profile = db.session.query(User).filter_by(id=user_id).one()
+                    form.firstname.data = my_profile.firstName
+                    form.lastname.data = my_profile.lastName
+                    return render_template('register.html', form=form, profile=my_profile, email_errors=email_errors)
+
+
                 updated_profile = db.session.query(User).get(user_id)
                 # salt and hash password
                 h_password = bcrypt.hashpw(
@@ -308,8 +327,8 @@ def edit_profile(user_id):
                 last_name = request.form['lastname']
                 updated_profile.lastName = last_name
 
-                email = request.form['email']
-                updated_profile.email = email
+                #email retrieved from above
+                updated_profile.email = in_email
 
                 if form.image.data.filename != '':
                     user_img = images.save(form.image.data)
@@ -321,14 +340,12 @@ def edit_profile(user_id):
                 return redirect(url_for('view_profile', user_id=user_id))
 
             else:
-                print('Had to go to edit profile again!')
                 # Get request - show new register form to edit profile
                 # retreive event from database
                 my_profile = db.session.query(User).filter_by(id=user_id).one()
                 form.firstname.data = my_profile.firstName
                 form.lastname.data = my_profile.lastName
-                form.email.data = my_profile.email
-                return render_template('register.html', form=form, profile=my_profile)
+                return render_template('register.html', form=form, profile=my_profile, email_errors=[])
         else:
             return redirect(url_for('view_profile', user_id=user_id))
     else:
