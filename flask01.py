@@ -222,7 +222,7 @@ def edit_event(event_id):
                     updated_event.description = description
                     db.session.add(updated_event)
                     db.session.commit()
-                    return redirect(url_for('home', user=session['user']))
+                    return redirect(url_for('view_event', event_id=event_id))
                 else:
                     return render_template('create-event.html', form=form, event=updated_event, time_error=time_error, date_error=date_error, user=session['user'])
 
