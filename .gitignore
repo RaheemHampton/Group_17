@@ -5,3 +5,5 @@
 /__pycache__
 /venv
 flask_event_app.db
+/.vscode
+
